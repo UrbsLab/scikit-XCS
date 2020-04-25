@@ -1,7 +1,12 @@
 
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import balanced_accuracy_score
+from skXCS.Environment import Environment
+from skXCS.Timer import Timer
+from skXCS.ClassifierSet import ClassifierSet
+from skXCS.PredictionArray import PredictionArray
 
+import random
 import numpy as np
 
 class XCS(BaseEstimator,ClassifierMixin):
@@ -44,6 +49,16 @@ class XCS(BaseEstimator,ClassifierMixin):
                 :param fitnessReduction:            The reduction of the fitness when generating an offspring classifier.
                 '''
 
+                # randomSeed
+                if randomSeed != "none":
+                    try:
+                        if not self.checkIsInt(randomSeed):
+                            raise Exception("randomSeed param must be integer or 'none'")
+                        random.seed(int(randomSeed))
+                        np.random.seed(int(randomSeed))
+                    except:
+                        raise Exception("randomSeed param must be integer or 'none'")
+
                 self.learningIterations = learningIterations
                 self.N = N
                 self.p_general = p_general
@@ -74,6 +89,16 @@ class XCS(BaseEstimator,ClassifierMixin):
 
                 self.hasTrained = False
 
+    def checkIsInt(self, num):
+        try:
+            n = float(num)
+            if num - int(num) == 0:
+                return True
+            else:
+                return False
+        except:
+            return False
+
     def fit(self,X,y):
         """Scikit-learn required: Supervised training of eLCS
 
@@ -103,4 +128,42 @@ class XCS(BaseEstimator,ClassifierMixin):
 
         except:
             raise Exception("X and y must be fully numeric")
+
+        self.env = Environment(X,y,self)
+        if self.theta_matching == None:
+            self.theta_matching = self.env.formatData.numberOfActions
+        self.timer = Timer()
+        self.population = ClassifierSet(self)
+        self.iterationCount = 0
+
+        while self.iterationCount < self.learningIterations:
+            state = self.env.getTrainState()
+            self.runIteration(state)
+            self.iterationCount += 1
+            self.env.newInstance()
+
+        self.hasTrained = True
+        return self
+
+    def runIteration(self,state):
+        shouldExplore = random.random() < self.p_explore
+        if shouldExplore:
+            self.population.createMatchSet(state,self)
+            predictionArray = PredictionArray(self.population,self)
+            actionWinner = predictionArray.randomActionWinner()
+            self.population.createActionSet(actionWinner)
+            reward = self.env.executeAction(actionWinner)
+            self.population.updateActionSet(reward,self)
+
+        else:
+            self.population.createMatchSet(state, self)
+            predictionArray = PredictionArray(self.population, self)
+            actionWinner = predictionArray.bestActionWinner()
+            self.population.createActionSet(actionWinner)
+            reward = self.env.executeAction(actionWinner)
+            self.population.updateActionSet(reward, self)
+
+
+
+
 
