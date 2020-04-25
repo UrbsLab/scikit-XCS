@@ -98,6 +98,7 @@ class XCS(BaseEstimator,ClassifierMixin):
                 self.hasTrained = False
                 self.trackingObj = tempTrackingObj()
                 self.record = IterationRecord()
+
     def checkIsInt(self, num):
         try:
             n = float(num)
