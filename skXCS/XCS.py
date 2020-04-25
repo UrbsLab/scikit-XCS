@@ -19,41 +19,197 @@ class XCS(BaseEstimator,ClassifierMixin):
                  randomSeed="none",predictionErrorReduction=0.25,fitnessReduction=0.1,trackingFrequency=0,evalWhileFit=False):
 
                 '''
-                :param learningIterations:          The number of explore or exploit learning iterations to run
-                :param N:                           Maximum micropopulation size
-                :param p_general:                   Probability of generalizing an allele during covering
-                :param beta:                        Learning Rate for updating statistics
-                :param alpha:                       The fall of rate in the fitness evaluation
-                :param e_0:                         The error threshold under which accuracy of a classifier can be set to 1
-                :param nu:                          Power parameter for fitness evaluation
-                :param theta_GA:                    The threshold for the GA application in an action set.
-                :param p_crossover:                 The probability of applying crossover in an offspring classifier.
-                :param p_mutation:                  The probability of mutating one allele and the action in an offspring classifier.
-                :param theta_del:                   Specified the threshold over which the fitness of a classifier may be considered in its deletion probability.
-                :param delta:                       The fraction of the mean fitness of the population below which the fitness of a classifier may be considered in its vote for deletion.
-                :param init_prediction:             The initial prediction value when generating a new classifier (e.g in covering).
-                :param init_e:                      The initial prediction error value when generating a new classifier (e.g in covering).
-                :param init_fitness:                The initial prediction value when generating a new classifier (e.g in covering).
-                :param p_explore:                   Probability of doing an explore cycle instead of an exploit cycle
-                :param theta_matching:              Number of unique actions that must be represented in the match set (otherwise, covering)
-                :param doGASubsumption:             Do subsumption in GA
-                :param doActionSetSubsumption:      Do subsumption in [A]
-                :param maxPayoff:                   For single step problems, what the maximum reward for correctness
-                :param theta_sub:                   The experience of a classifier required to be a subsumer.
-                :param theta_select:                The fraction of the action set to be included in tournament selection.
-                :param discreteAttributeLimit:      Multipurpose param. If it is a nonnegative integer, discreteAttributeLimit determines the threshold that determines
+                :param learningIterations:          Must be nonnegative integer. The number of explore or exploit learning iterations to run
+                :param N:                           Must be nonnegative integer. Maximum micropopulation size
+                :param p_general:                   Must be float from 0 - 1. Probability of generalizing an allele during covering
+                :param beta:                        Must be float. Learning Rate for updating statistics
+                :param alpha:                       Must be float. The fall of rate in the fitness evaluation
+                :param e_0:                         Must be float. The error threshold under which accuracy of a classifier can be set to 1
+                :param nu:                          Must be float. Power parameter for fitness evaluation
+                :param theta_GA:                    Must be nonnegative float. The threshold for the GA application in an action set.
+                :param p_crossover:                 Must be float from 0 - 1. The probability of applying crossover in an offspring classifier.
+                :param p_mutation:                  Must be float from 0 - 1. The probability of mutating one allele and the action in an offspring classifier.
+                :param theta_del:                   Must be nonnegative integer. Specified the threshold over which the fitness of a classifier may be considered in its deletion probability.
+                :param delta:                       Must be float. The fraction of the mean fitness of the population below which the fitness of a classifier may be considered in its vote for deletion.
+                :param init_prediction:             Must be float. The initial prediction value when generating a new classifier (e.g in covering).
+                :param init_e:                      Must be float. The initial prediction error value when generating a new classifier (e.g in covering).
+                :param init_fitness:                Must be float. The initial prediction value when generating a new classifier (e.g in covering).
+                :param p_explore:                   Must be float from 0 - 1. Probability of doing an explore cycle instead of an exploit cycle
+                :param theta_matching:              Must be nonnegative integer. Number of unique actions that must be represented in the match set (otherwise, covering)
+                :param doGASubsumption:             Must be boolean. Do subsumption in GA
+                :param doActionSetSubsumption:      Must be boolean. Do subsumption in [A]
+                :param maxPayoff:                   Must be float. For single step problems, what the maximum reward for correctness
+                :param theta_sub:                   Must be nonnegative integer. The experience of a classifier required to be a subsumer.
+                :param theta_select:                Must be float from 0 - 1. The fraction of the action set to be included in tournament selection.
+                :param discreteAttributeLimit:      Must be nonnegative integer OR "c" OR "d". Multipurpose param. If it is a nonnegative integer, discreteAttributeLimit determines the threshold that determines
                                                     if an attribute will be treated as a continuous or discrete attribute. For example, if discreteAttributeLimit == 10, if an attribute has more than 10 unique
                                                     values in the dataset, the attribute will be continuous. If the attribute has 10 or less unique values, it will be discrete. Alternatively,
                                                     discreteAttributeLimit can take the value of "c" or "d". See next param for this
-                :param specifiedAttributes:         If "c", attributes specified by index in this param will be continuous and the rest will be discrete. If "d", attributes specified by index in this
+                :param specifiedAttributes:         Must be an ndarray type of nonnegative integer attributeIndices (zero indexed).
+                                                    If "c", attributes specified by index in this param will be continuous and the rest will be discrete. If "d", attributes specified by index in this
                                                     param will be discrete and the rest will be continuous.
-                :param randomSeed:                  Set a constant random seed value to some integer (in order to obtain reproducible results). Put 'none' if none (for pseudo-random algorithm runs)
-                :param predictionErrorReduction:    The reduction of the prediction error when generating an offspring classifier.
-                :param fitnessReduction:            The reduction of the fitness when generating an offspring classifier.
-                :param trackingFrequency:           Relevant only if evalWhileFit param is true. Conducts accuracy approximations and population measurements every trackingFrequency iterations.
+                :param randomSeed:                  Must be an integer or "none". Set a constant random seed value to some integer (in order to obtain reproducible results). Put 'none' if none (for pseudo-random algorithm runs)
+                :param predictionErrorReduction:    Must be float. The reduction of the prediction error when generating an offspring classifier.
+                :param fitnessReduction:            Must be float. The reduction of the fitness when generating an offspring classifier.
+                :param trackingFrequency:           Must be nonnegative integer. Relevant only if evalWhileFit param is true. Conducts accuracy approximations and population measurements every trackingFrequency iterations.
                                                     If param == 0, tracking done once every epoch.
-                :param evalWhileFit:                Determines if live tracking and evaluation is done during model training
+                :param evalWhileFit:                Must be boolean. Determines if live tracking and evaluation is done during model training
                 '''
+
+                #learningIterations
+                if not self.checkIsInt(learningIterations):
+                    raise Exception("learningIterations param must be nonnegative integer")
+
+                if learningIterations < 0:
+                    raise Exception("learningIterations param must be nonnegative integer")
+
+                #N
+                if not self.checkIsInt(N):
+                    raise Exception("N param must be nonnegative integer")
+
+                if N < 0:
+                    raise Exception("N param must be nonnegative integer")
+
+                #p_general
+                if not self.checkIsFloat(p_general):
+                    raise Exception("p_general param must be float from 0 - 1")
+
+                if p_general < 0 or p_general > 1:
+                    raise Exception("p_general param must be float from 0 - 1")
+
+                #beta
+                if not self.checkIsFloat(beta):
+                    raise Exception("beta param must be float")
+
+                #alpha
+                if not self.checkIsFloat(alpha):
+                    raise Exception("alpha param must be float")
+
+                #e_0
+                if not self.checkIsFloat(e_0):
+                    raise Exception("e_0 param must be float")
+
+                #nu
+                if not self.checkIsFloat(nu):
+                    raise Exception("nu param must be float")
+
+                #theta_GA
+                if not self.checkIsFloat(theta_GA):
+                    raise Exception("theta_GA param must be nonnegative float")
+
+                if theta_GA < 0:
+                    raise Exception("theta_GA param must be nonnegative float")
+
+                #p_crossover
+                if not self.checkIsFloat(p_crossover):
+                    raise Exception("p_crossover param must be float from 0 - 1")
+
+                if p_crossover < 0 or p_crossover > 1:
+                    raise Exception("p_crossover param must be float from 0 - 1")
+
+                #p_mutation
+                if not self.checkIsFloat(p_mutation):
+                    raise Exception("p_mutation param must be float from 0 - 1")
+
+                if p_mutation < 0 or p_mutation > 1:
+                    raise Exception("p_mutation param must be float from 0 - 1")
+
+                #theta_del
+                if not self.checkIsInt(theta_del):
+                    raise Exception("theta_del param must be nonnegative integer")
+
+                if theta_del < 0:
+                    raise Exception("theta_del param must be nonnegative integer")
+
+                #delta
+                if not self.checkIsFloat(delta):
+                    raise Exception("delta param must be float")
+
+                #init_prediction
+                if not self.checkIsFloat(init_prediction):
+                    raise Exception("init_prediction param must be float")
+
+                #init_e
+                if not self.checkIsFloat(init_e):
+                    raise Exception("init_e param must be float")
+
+                #init_fitness
+                if not self.checkIsFloat(init_fitness):
+                    raise Exception("init_fitness param must be float")
+
+                #p_explore
+                if not self.checkIsFloat(p_explore):
+                    raise Exception("p_explore param must be float from 0 - 1")
+
+                if p_explore < 0 or p_explore > 1:
+                    raise Exception("p_explore param must be float from 0 - 1")
+
+                #theta_matching
+                if not self.checkIsInt(theta_matching):
+                    raise Exception("theta_matching param must be nonnegative integer")
+
+                if theta_matching < 0:
+                    raise Exception("theta_matching param must be nonnegative integer")
+
+                #doGASubsumption
+                if not (isinstance(doGASubsumption, bool)):
+                    raise Exception("doGASubsumption param must be boolean")
+
+                #doActionSetSubsumption
+                if not (isinstance(doActionSetSubsumption, bool)):
+                    raise Exception("doActionSetSubsumption param must be boolean")
+
+                #maxPayoff
+                if not self.checkIsFloat(maxPayoff):
+                    raise Exception("maxPayoff param must be float")
+
+                #theta_sub
+                if not self.checkIsInt(theta_sub):
+                    raise Exception("theta_sub param must be nonnegative integer")
+
+                if theta_sub < 0:
+                    raise Exception("theta_sub param must be nonnegative integer")
+
+                #theta_select
+                if not self.checkIsFloat(theta_select):
+                    raise Exception("theta_select param must be float from 0 - 1")
+
+                if theta_select < 0 or theta_select > 1:
+                    raise Exception("theta_select param must be float from 0 - 1")
+
+                #discreteAttributeLimit
+                if discreteAttributeLimit != "c" and discreteAttributeLimit != "d":
+                    try:
+                        dpl = int(discreteAttributeLimit)
+                        if not self.checkIsInt(discreteAttributeLimit):
+                            raise Exception("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'")
+                        if dpl < 0:
+                            raise Exception("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'")
+                    except:
+                        raise Exception("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'")
+
+                #specifiedAttributes
+                if not (isinstance(specifiedAttributes, np.ndarray)):
+                    raise Exception("specifiedAttributes param must be ndarray")
+
+                #predictionErrorReduction
+                if not self.checkIsFloat(predictionErrorReduction):
+                    raise Exception("predictionErrorReduction param must be float")
+
+                #fitnessReduction
+                if not self.checkIsFloat(fitnessReduction):
+                    raise Exception("fitnessReduction param must be float")
+
+                #trackingFrequency
+                if not self.checkIsInt(trackingFrequency):
+                    raise Exception("trackingFrequency param must be nonnegative integer")
+
+                if trackingFrequency < 0:
+                    raise Exception("trackingFrequency param must be nonnegative integer")
+
+                #evalWhileFit
+                if not (isinstance(evalWhileFit, bool)):
+                    raise Exception("evalWhileFit param must be boolean")
 
                 # randomSeed
                 if randomSeed != "none":
@@ -106,6 +262,13 @@ class XCS(BaseEstimator,ClassifierMixin):
                 return True
             else:
                 return False
+        except:
+            return False
+
+    def checkIsFloat(self,num):
+        try:
+            n = float(num)
+            return True
         except:
             return False
 
