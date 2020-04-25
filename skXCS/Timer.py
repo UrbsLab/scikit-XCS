@@ -9,7 +9,6 @@ class Timer:
         # Global Time objects
         self.globalStartRef = time.time()
         self.globalTime = 0.0
-        self.addedTime = 0.0
 
         # Match Time Variables
         self.startRefMatching = 0.0
@@ -23,9 +22,9 @@ class Timer:
         self.startRefSubsumption = 0.0
         self.globalSubsumption = 0.0
 
-        # Selection Time Variables
-        self.startRefSelection = 0.0
-        self.globalSelection = 0.0
+        # GA Time Variables
+        self.startRefGA = 0.0
+        self.globalGA = 0.0
 
         # Evaluation Time Variables
         self.startRefEvaluation = 0.0
@@ -65,14 +64,14 @@ class Timer:
 
         # ************************************************************
 
-    def startTimeSelection(self):
+    def startTimeGA(self):
         """ Tracks Selection Time """
-        self.startRefSelection = time.time()
+        self.startRefGA = time.time()
 
-    def stopTimeSelection(self):
+    def stopTimeGA(self):
         """ Tracks Selection Time """
-        diff = time.time() - self.startRefSelection
-        self.globalSelection += diff
+        diff = time.time() - self.startRefGA
+        self.globalGA += diff
 
     # ************************************************************
     def startTimeEvaluation(self):
@@ -86,7 +85,7 @@ class Timer:
 
         # ************************************************************
 
-    def returnGlobalTimer(self):
+    def updateGlobalTimer(self):
         """ Set the global end timer, call at very end of algorithm. """
-        self.globalTime = (time.time() - self.globalStartRef) + self.addedTime  # Reports time in minutes, addedTime is for population reboot.
+        self.globalTime = (time.time() - self.globalStartRef)
         return self.globalTime

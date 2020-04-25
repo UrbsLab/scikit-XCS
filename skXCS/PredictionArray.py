@@ -1,9 +1,12 @@
 import random
+import numpy as np
+
 class PredictionArray:
     def __init__(self,population,xcs):
         self.predictionArray = {}
         self.fitnesses = {}
         self.actionList = xcs.env.formatData.phenotypeList
+        self.probabilities = {}
 
         for eachClass in self.actionList:
             self.predictionArray[eachClass] = 0.0
@@ -21,6 +24,18 @@ class PredictionArray:
                 self.predictionArray[eachClass] /= self.fitnesses[eachClass]
             else:
                 self.predictionArray[eachClass] = 0
+
+        #Populate Probabilities
+        probabilitySum = 0
+        for action,value in sorted(self.predictionArray.items()):
+            self.probabilities[action] = value
+            probabilitySum += value
+        if probabilitySum == 0:
+            for action, prob in sorted(self.probabilities.items()):
+                self.probabilities[action] = 0
+        else:
+            for action, prob in sorted(self.probabilities.items()):
+                self.probabilities[action] = prob/probabilitySum
 
     def getBestValue(self):
         return max(self.predictionArray,key=self.predictionArray.get)
@@ -50,3 +65,11 @@ class PredictionArray:
                 bestIndexList.append(action)
         return random.choice(bestIndexList)
 
+    ##*************** Get ActionProbabilities ****************
+    def getProbabilities(self):
+        probabilityList = np.empty(len(sorted(self.probabilities.items())))
+        counter = 0
+        for action,prob in sorted(self.probabilities.items()):
+            probabilityList[counter] = prob
+            counter += 1
+        return probabilityList

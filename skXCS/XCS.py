@@ -5,6 +5,7 @@ from skXCS.Environment import Environment
 from skXCS.Timer import Timer
 from skXCS.ClassifierSet import ClassifierSet
 from skXCS.PredictionArray import PredictionArray
+from skXCS.IterationRecord import IterationRecord
 
 import random
 import numpy as np
@@ -13,7 +14,7 @@ class XCS(BaseEstimator,ClassifierMixin):
     def __init__(self,learningIterations=10000,N=1000,p_general=0.5,beta=0.15,alpha=0.1,e_0=10,nu=5,theta_GA=25,p_crossover=0.8,p_mutation=0.04,
                  theta_del=20,delta=0.1,init_prediction=10,init_e=0,init_fitness=0.01,p_explore=0.5,theta_matching=None,doGASubsumption=True,
                  doActionSetSubsumption=True,maxPayoff=1000,theta_sub=20,theta_select=0.5,discreteAttributeLimit=10,specifiedAttributes=np.array([]),
-                 randomSeed="none",predictionErrorReduction=0.25,fitnessReduction=0.1):
+                 randomSeed="none",predictionErrorReduction=0.25,fitnessReduction=0.1,trackingFrequency=0,evalWhileFit=False):
 
                 '''
                 :param learningIterations:          The number of explore or exploit learning iterations to run
@@ -47,6 +48,9 @@ class XCS(BaseEstimator,ClassifierMixin):
                 :param randomSeed:                  Set a constant random seed value to some integer (in order to obtain reproducible results). Put 'none' if none (for pseudo-random algorithm runs)
                 :param predictionErrorReduction:    The reduction of the prediction error when generating an offspring classifier.
                 :param fitnessReduction:            The reduction of the fitness when generating an offspring classifier.
+                :param trackingFrequency:           Relevant only if evalWhileFit param is true. Conducts accuracy approximations and population measurements every trackingFrequency iterations.
+                                                    If param == 0, tracking done once every epoch.
+                :param evalWhileFit:                Determines if live tracking and evaluation is done during model training
                 '''
 
                 # randomSeed
@@ -86,9 +90,12 @@ class XCS(BaseEstimator,ClassifierMixin):
                 self.randomSeed = randomSeed
                 self.predictionErrorReduction = predictionErrorReduction
                 self.fitnessReduction = fitnessReduction
+                self.trackingFrequency = trackingFrequency
+                self.evalWhileFit = evalWhileFit
 
                 self.hasTrained = False
-
+                self.trackingObj = tempTrackingObj()
+                self.record = IterationRecord()
     def checkIsInt(self, num):
         try:
             n = float(num)
@@ -99,19 +106,13 @@ class XCS(BaseEstimator,ClassifierMixin):
         except:
             return False
 
+    ##*************** Fit ****************
     def fit(self,X,y):
         """Scikit-learn required: Supervised training of eLCS
-
             Parameters
-            ----------
-            X: array-like {n_samples, n_features}
-                Training instances. ALL INSTANCE ATTRIBUTES MUST BE NUMERIC or NAN
-            y: array-like {n_samples}
-                Training labels. ALL INSTANCE PHENOTYPES MUST BE NUMERIC NOT NAN OR OTHER TYPE
-
-            Returns
-            __________
-            self
+            X: array-like {n_samples, n_features} Training instances. ALL INSTANCE ATTRIBUTES MUST BE NUMERIC or NAN
+            y: array-like {n_samples} Training labels. ALL INSTANCE PHENOTYPES MUST BE NUMERIC NOT NAN OR OTHER TYPE
+            Returns self
         """
         # If trained already, raise Exception
         if self.hasTrained:
@@ -130,15 +131,46 @@ class XCS(BaseEstimator,ClassifierMixin):
             raise Exception("X and y must be fully numeric")
 
         self.env = Environment(X,y,self)
+
         if self.theta_matching == None:
             self.theta_matching = self.env.formatData.numberOfActions
+        if self.trackingFrequency == 0:
+            self.trackingFrequency = self.env.formatData.numTrainInstances
+
         self.timer = Timer()
         self.population = ClassifierSet(self)
         self.iterationCount = 0
+        self.numCorrectGuessesDuringExploit = 0
+        self.numExploitCycles = 0
+        trackedAccuracy = 0
+        aveGenerality = 0
 
         while self.iterationCount < self.learningIterations:
             state = self.env.getTrainState()
             self.runIteration(state)
+
+            #Basic Evaluation
+            self.timer.updateGlobalTimer()
+            self.timer.startTimeEvaluation()
+            if self.iterationCount%self.trackingFrequency == (self.trackingFrequency-1):
+                if self.evalWhileFit:
+                    aveGenerality = self.population.getAveGenerality(self)
+                if self.numExploitCycles != 0:
+                    trackedAccuracy = self.numCorrectGuessesDuringExploit/self.numExploitCycles
+                self.numCorrectGuessesDuringExploit = 0
+                self.numExploitCycles = 0
+            self.record.addToTracking(self.iterationCount,trackedAccuracy,aveGenerality,
+                                      self.trackingObj.macroPopSize,self.trackingObj.microPopSize,
+                                      self.trackingObj.matchSetSize, self.trackingObj.actionSetSize,
+                                      self.trackingObj.avgIterAge, self.trackingObj.subsumptionCount,
+                                      self.trackingObj.crossOverCount, self.trackingObj.mutationCount,
+                                      self.trackingObj.coveringCount, self.trackingObj.deletionCount,
+                                      self.timer.globalTime, self.timer.globalMatching,
+                                      self.timer.globalDeletion, self.timer.globalSubsumption,
+                                      self.timer.globalGA, self.timer.globalEvaluation)
+            self.timer.stopTimeEvaluation()
+            ###
+
             self.iterationCount += 1
             self.env.newInstance()
 
@@ -146,6 +178,7 @@ class XCS(BaseEstimator,ClassifierMixin):
         return self
 
     def runIteration(self,state):
+        self.trackingObj.resetAll()
         shouldExplore = random.random() < self.p_explore
         if shouldExplore:
             self.population.createMatchSet(state,self)
@@ -154,7 +187,8 @@ class XCS(BaseEstimator,ClassifierMixin):
             self.population.createActionSet(actionWinner)
             reward = self.env.executeAction(actionWinner)
             self.population.updateActionSet(reward,self)
-
+            self.population.runGA(state,self)
+            self.population.deletion(self)
         else:
             self.population.createMatchSet(state, self)
             predictionArray = PredictionArray(self.population, self)
@@ -162,8 +196,120 @@ class XCS(BaseEstimator,ClassifierMixin):
             self.population.createActionSet(actionWinner)
             reward = self.env.executeAction(actionWinner)
             self.population.updateActionSet(reward, self)
+            self.population.deletion(self)
 
+            if reward == self.maxPayoff:
+                self.numCorrectGuessesDuringExploit += 1
+            self.numExploitCycles += 1
 
+        self.trackingObj.macroPopSize = len(self.population.popSet)
+        self.trackingObj.microPopSize = self.population.microPopSize
+        self.trackingObj.matchSetSize = len(self.population.matchSet)
+        self.trackingObj.actionSetSize = len(self.population.actionSet)
+        self.trackingObj.avgIterAge = self.population.getIterStampAverage()
+        self.population.clearSets()
 
+    ##*************** Predict and Score ****************
+    def predict(self,X):
+        """Scikit-learn required: Test Accuracy of eLCS
+            Parameters
+            X: array-like {n_samples, n_features} Test instances to classify. ALL INSTANCE ATTRIBUTES MUST BE NUMERIC
+            Returns
+            y: array-like {n_samples} Classifications.
+        """
+        try:
+            for instance in X:
+                for value in instance:
+                    if not (np.isnan(value)):
+                        float(value)
+        except:
+            raise Exception("X must be fully numeric")
 
+        numInstances = X.shape[0]
+        predictionList = []
+        for instance in range(numInstances):
+            state = X[instance]
+            self.population.makeEvaluationMatchSet(state,self)
+            predictionArray = PredictionArray(self.population, self)
+            actionWinner = predictionArray.bestActionWinner()
+            predictionList.append(actionWinner)
+            self.population.clearSets()
+        return np.array(predictionList)
 
+    def predict_proba(self,X):
+        """Scikit-learn required: Test Accuracy of eLCS
+            Parameters
+            X: array-like {n_samples, n_features} Test instances to classify. ALL INSTANCE ATTRIBUTES MUST BE NUMERIC
+            Returns
+            y: array-like {n_samples} Classifications.
+        """
+        try:
+            for instance in X:
+                for value in instance:
+                    if not (np.isnan(value)):
+                        float(value)
+        except:
+            raise Exception("X must be fully numeric")
+
+        numInstances = X.shape[0]
+        predictionList = []
+        for instance in range(numInstances):
+            state = X[instance]
+            self.population.makeEvaluationMatchSet(state, self)
+            predictionArray = PredictionArray(self.population, self)
+            probabilities = predictionArray.getProbabilities()
+            predictionList.append(probabilities)
+            self.population.clearSets()
+        return np.array(predictionList)
+
+    def score(self,X,y):
+        predictionList = self.predict(X)
+        return balanced_accuracy_score(y,predictionList)
+
+    ##*************** Export and Evaluation ****************
+    def exportIterationTrackingDataToCSV(self,filename='iterationData.csv'):
+        if self.hasTrained:
+            self.record.exportTrackingToCSV(filename)
+        else:
+            raise Exception("There is no tracking data to export, as the eLCS model has not been trained")
+
+    def exportFinalRulePopulation(self,filename='rulePopulation.csv'):
+        pass
+
+    def getFinalTrainingAccuracy(self):
+        pass
+
+    def getFinalInstanceCoverage(self):
+        pass
+
+    def getFinalAttributeSpecificityList(self):
+        pass
+
+    def getFinalAttributeAccuracyList(self):
+        pass
+
+class tempTrackingObj():
+    #Tracks stats of every iteration (except accuracy, avg generality, and times)
+    def __init__(self):
+        self.macroPopSize = 0
+        self.microPopSize = 0
+        self.matchSetSize = 0
+        self.correctSetSize = 0
+        self.avgIterAge = 0
+        self.subsumptionCount = 0
+        self.crossOverCount = 0
+        self.mutationCount = 0
+        self.coveringCount = 0
+        self.deletionCount = 0
+
+    def resetAll(self):
+        self.macroPopSize = 0
+        self.microPopSize = 0
+        self.matchSetSize = 0
+        self.correctSetSize = 0
+        self.avgIterAge = 0
+        self.subsumptionCount = 0
+        self.crossOverCount = 0
+        self.mutationCount = 0
+        self.coveringCount = 0
+        self.deletionCount = 0

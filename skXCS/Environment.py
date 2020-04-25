@@ -4,7 +4,6 @@ from skXCS.DataManagement import DataManagement
 class Environment:
     def __init__(self,X,y,xcs):
         self.dataRef = 0
-        self.storeDataRef = 0
         self.formatData = DataManagement(X,y,xcs)
         self.maxPayoff = xcs.maxPayoff
 

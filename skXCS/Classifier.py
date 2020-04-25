@@ -1,4 +1,5 @@
 import random
+import copy
 
 class Classifier:
     def __init__(self,xcs):
@@ -15,9 +16,19 @@ class Classifier:
         self.actionSetSize = None
         self.timestampGA = xcs.iterationCount
         self.initTimeStamp = xcs.iterationCount
-
+        self.deletionProb = None
 
         pass
+
+    def initializeWithParentClassifier(self,classifier):
+        self.specifiedAttList = copy.deepcopy(classifier.specifiedAttList)
+        self.condition = copy.deepcopy(classifier.condition)
+        self.action = copy.deepcopy(classifier.action)
+
+        self.actionSetSize = classifier.actionSetSize
+        self.prediction = classifier.prediction
+        self.predictionError = classifier.predictionError
+        self.fitness = classifier.fitness/classifier.numerosity
 
     def match(self,state,xcs):
         for i in range(len(self.condition)):
@@ -93,19 +104,19 @@ class Classifier:
 
     def updatePredictionError(self,P,xcs):
         if self.experience < 1.0/xcs.beta:
-            self.predictionError = (self.predictionError*(self.experience - 1) + abs(P - self.prediction)) / float(self.experience)
+            self.predictionError = self.predictionError + (abs(P - self.prediction) - self.predictionError) / float(self.experience)
         else:
             self.predictionError = self.predictionError + xcs.beta * (abs(P - self.prediction) - self.predictionError)
 
     def updatePrediction(self,P,xcs):
         if self.experience < 1.0 / xcs.beta:
-            self.prediction = (self.prediction * (self.experience - 1) + P) / float(self.experience)
+            self.prediction = self.prediction + (P-self.prediction) / float(self.experience)
         else:
             self.prediction = self.prediction + xcs.beta * (P - self.prediction)
 
     def updateActionSetSize(self,numerositySum,xcs):
         if self.experience < 1.0/xcs.beta:
-            self.actionSetSize = (self.actionSetSize * (self.experience-1)+ numerositySum) / float(self.experience)
+            self.actionSetSize = self.actionSetSize + (numerositySum - self.actionSetSize) / float(self.experience)
         else:
             self.actionSetSize = self.actionSetSize + xcs.beta * (numerositySum - self.actionSetSize)
 
@@ -151,3 +162,158 @@ class Classifier:
                 if self.condition[i][1] > classifier.condition[otherRef][1]:
                     return False
         return True
+
+    def subsumes(self,classifier,xcs):
+        return self.action == classifier.action and self.isSubsumer(xcs) and self.isMoreGeneral(classifier,xcs)
+
+    def updateTimestamp(self,timestamp):
+        self.timestampGA = timestamp
+
+    def uniformCrossover(self,classifier,xcs):
+        p_self_specifiedAttList = copy.deepcopy(self.specifiedAttList)
+        p_cl_specifiedAttList = copy.deepcopy(classifier.specifiedAttList)
+
+        # Make list of attribute references appearing in at least one of the parents.-----------------------------
+        comboAttList = []
+        for i in p_self_specifiedAttList:
+            comboAttList.append(i)
+        for i in p_cl_specifiedAttList:
+            if i not in comboAttList:
+                comboAttList.append(i)
+            elif not xcs.env.formatData.attributeInfoType[i]:
+                comboAttList.remove(i)
+        comboAttList.sort()
+
+        changed = False
+        for attRef in comboAttList:
+            attributeInfoType = xcs.env.formatData.attributeInfoType[attRef]
+            probability = 0.5
+            ref = 0
+            if attRef in p_self_specifiedAttList:
+                ref += 1
+            if attRef in p_cl_specifiedAttList:
+                ref += 1
+
+            if ref == 0:
+                pass
+            elif ref == 1:
+                if attRef in p_self_specifiedAttList and random.random() > probability:
+                    i = self.specifiedAttList.index(attRef)
+                    classifier.condition.append(self.condition.pop(i))
+
+                    classifier.specifiedAttList.append(attRef)
+                    self.specifiedAttList.remove(attRef)
+                    changed = True
+
+                if attRef in p_cl_specifiedAttList and random.random() < probability:
+                    i = classifier.specifiedAttList.index(attRef)
+                    self.condition.append(classifier.condition.pop(i))
+
+                    self.specifiedAttList.append(attRef)
+                    classifier.specifiedAttList.remove(attRef)
+                    changed = True
+            else:
+                # Continuous Attribute
+                if attributeInfoType:
+                    i_cl1 = self.specifiedAttList.index(attRef)
+                    i_cl2 = classifier.specifiedAttList.index(attRef)
+                    tempKey = random.randint(0, 3)
+                    if tempKey == 0:
+                        temp = self.condition[i_cl1][0]
+                        self.condition[i_cl1][0] = classifier.condition[i_cl2][0]
+                        classifier.condition[i_cl2][0] = temp
+                    elif tempKey == 1:
+                        temp = self.condition[i_cl1][1]
+                        self.condition[i_cl1][1] = classifier.condition[i_cl2][1]
+                        classifier.condition[i_cl2][1] = temp
+                    else:
+                        allList = self.condition[i_cl1] + classifier.condition[i_cl2]
+                        newMin = min(allList)
+                        newMax = max(allList)
+                        if tempKey == 2:
+                            self.condition[i_cl1] = [newMin, newMax]
+                            classifier.condition.pop(i_cl2)
+
+                            classifier.specifiedAttList.remove(attRef)
+                        else:
+                            classifier.condition[i_cl2] = [newMin, newMax]
+                            self.condition.pop(i_cl1)
+
+                            self.specifiedAttList.remove(attRef)
+
+                # Discrete Attribute
+                else:
+                    pass
+
+        tempList1 = copy.deepcopy(p_self_specifiedAttList)
+        tempList2 = copy.deepcopy(classifier.specifiedAttList)
+        tempList1.sort()
+        tempList2.sort()
+
+        if changed and len(set(tempList1) & set(tempList2)) == len(tempList2):
+            changed = False
+
+        return changed
+
+    def mutation(self,state,xcs):
+        changedByConditionMutation = self.mutateCondition(state,xcs)
+        changedByActionMutation = self.mutateAction(xcs)
+        return changedByConditionMutation or changedByActionMutation
+
+    def mutateCondition(self,state,xcs):
+        changed = False
+        for attRef in range(xcs.env.formatData.numAttributes):
+            attributeInfoType = xcs.env.formatData.attributeInfoType[attRef]
+            if attributeInfoType:
+                attributeInfoValue = xcs.env.formatData.attributeInfoContinuous[attRef]
+
+            if random.random() < xcs.p_mutation and not(state[attRef] == None):
+                if not (attRef in self.specifiedAttList):
+                    self.specifiedAttList.append(attRef)
+                    self.createMatchingAttribute(xcs,attRef,state)
+                    changed = True
+                elif attRef in self.specifiedAttList:
+                    i = self.specifiedAttList.index(attRef)
+
+                    if not attributeInfoType or random.random() > 0.5:
+                        del self.specifiedAttList[i]
+                        del self.condition[i]
+                        changed = True
+                    else:
+                        attRange = float(attributeInfoValue[1]) - float(attributeInfoValue[0])
+                        mutateRange = random.random() * 0.5 * attRange
+                        if random.random() > 0.5:
+                            if random.random() > 0.5:
+                                self.condition[i][0] += mutateRange
+                            else:
+                                self.condition[i][0] -= mutateRange
+                        else:
+                            if random.random() > 0.5:
+                                self.condition[i][1] += mutateRange
+                            else:
+                                self.condition[i][1] -= mutateRange
+                        self.condition[i] = sorted(self.condition[i])
+                        changed = True
+                else:
+                    pass
+        return changed
+
+    def mutateAction(self,xcs):
+        changed = False
+        if random() < xcs.p_mutation:
+            action = random.choice(xcs.env.formatData.phenotypeList)
+            while action == self.action:
+                action = random.choice(xcs.env.formatData.phenotypeList)
+            self.action = action
+            changed = True
+        return changed
+
+    def getDelProp(self,meanFitness,xcs):
+        if self.fitness / self.numerosity >= xcs.delta * meanFitness or self.matchCount < xcs.theta_del:
+            self.deletionVote = self.aveMatchSetSize * self.numerosity
+
+        elif self.fitness == 0.0:
+            self.deletionVote = self.aveMatchSetSize * self.numerosity * meanFitness / (xcs.init_fit / self.numerosity)
+        else:
+            self.deletionVote = self.aveMatchSetSize * self.numerosity * meanFitness / (self.fitness / self.numerosity)
+        return self.deletionVote
