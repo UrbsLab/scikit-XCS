@@ -40,6 +40,9 @@ class ClassifierSet:
             xcs.trackingObj.coveringCount += 1
 
             doCovering = totalNumActions - len(actionsNotCovered) < xcs.theta_matching
+
+        for ref in self.matchSet:
+            self.popSet[ref].matchCount += 1
         xcs.timer.stopTimeMatching()
 
     def getIdenticalClassifier(self,xcs,newClassifier):
@@ -212,11 +215,22 @@ class ClassifierSet:
             if len(child.specifiedAttList) > 0:
                 self.addClassifierToPopulation(xcs, child, False)
 
-    def getIterStampAverage(self):
+    def getIterStampAverage(self): #Average GA Timestamp
         sumCl = 0
         numSum = 0
         for ref in self.actionSet:
             sumCl += self.popSet[ref].timeStampGA * self.popSet[ref].numerosity
+            numSum += self.popSet[ref].numerosity
+        if numSum != 0:
+            return sumCl/float(numSum)
+        else:
+            return 0
+
+    def getInitStampAverage(self): #Average Init Timestamp
+        sumCl = 0
+        numSum = 0
+        for ref in self.actionSet:
+            sumCl += self.popSet[ref].initTimeStamp * self.popSet[ref].numerosity
             numSum += self.popSet[ref].numerosity
         if numSum != 0:
             return sumCl/float(numSum)
@@ -307,3 +321,20 @@ class ClassifierSet:
             aveGenerality = generalitySum/self.microPopSize
 
         return aveGenerality
+
+    def getAttributeSpecificityList(self,xcs): #To be changed for XCS
+        attributeSpecList = []
+        for i in range(xcs.env.formatData.numAttributes):
+            attributeSpecList.append(0)
+        for cl in self.popSet:
+            for ref in cl.specifiedAttList:
+                attributeSpecList[ref] += cl.numerosity
+
+    def getAttributeAccuracyList(self,xcs): #To be changed for XCS
+        attributeAccList = []
+        for i in range(xcs.env.formatData.numAttributes):
+            attributeAccList.append(0.0)
+        for cl in self.popSet:
+            for ref in cl.specifiedAttList:
+                attributeAccList[ref] += cl.numerosity * cl.accuracy
+

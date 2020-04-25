@@ -3,6 +3,7 @@ import numpy as np
 
 class DataManagement:
     def __init__(self,X,y,xcs):
+        self.savedRawTrainingData = [X,y]
         self.numAttributes = X.shape[1]
         self.attributeInfoType = [0] * self.numAttributes             # stores false (d) or true (c) depending on its type, which points to parallel reference in one of the below 2 arrays
         self.attributeInfoContinuous = [[0, 0]] * self.numAttributes  # stores continuous ranges and NaN otherwise

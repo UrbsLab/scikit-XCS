@@ -7,6 +7,7 @@ class PredictionArray:
         self.fitnesses = {}
         self.actionList = xcs.env.formatData.phenotypeList
         self.probabilities = {}
+        self.hasMatch = len(population.matchSet) != 0
 
         for eachClass in self.actionList:
             self.predictionArray[eachClass] = 0.0

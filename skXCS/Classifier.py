@@ -13,6 +13,8 @@ class Classifier:
 
         self.numerosity = 1
         self.experience = 0 #aka action set count
+        self.matchCount = 0
+
         self.actionSetSize = None
         self.timestampGA = xcs.iterationCount
         self.initTimeStamp = xcs.iterationCount
@@ -309,11 +311,11 @@ class Classifier:
         return changed
 
     def getDelProp(self,meanFitness,xcs):
-        if self.fitness / self.numerosity >= xcs.delta * meanFitness or self.matchCount < xcs.theta_del:
-            self.deletionVote = self.aveMatchSetSize * self.numerosity
+        if self.fitness / self.numerosity >= xcs.delta * meanFitness or self.experience < xcs.theta_del:
+            self.deletionVote = self.actionSetSize * self.numerosity
 
         elif self.fitness == 0.0:
-            self.deletionVote = self.aveMatchSetSize * self.numerosity * meanFitness / (xcs.init_fit / self.numerosity)
+            self.deletionVote = self.actionSetSize * self.numerosity * meanFitness / (xcs.init_fit / self.numerosity)
         else:
-            self.deletionVote = self.aveMatchSetSize * self.numerosity * meanFitness / (self.fitness / self.numerosity)
+            self.deletionVote = self.actionSetSize * self.numerosity * meanFitness / (self.fitness / self.numerosity)
         return self.deletionVote

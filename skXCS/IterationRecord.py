@@ -15,7 +15,7 @@ class IterationRecord():
         3-micropopulation size
         4-match set size
         5-correct set size
-        6-average iteration age of correct set classifiers
+        6-average iteration age of action set classifiers
         7-number of classifiers subsumed (in iteration)
         8-number of crossover operations performed (in iteration)
         9-number of mutation operations performed (in iteration)
