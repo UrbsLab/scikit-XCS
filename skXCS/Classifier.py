@@ -87,9 +87,9 @@ class Classifier:
             self.condition.append(condList)
 
     def equals(self,classifier):
-        if classifier.action == self.action and len(classifier.specifiedAttList) == len(classifier.specifiedAttList):
+        if classifier.action == self.action and len(classifier.specifiedAttList) == len(self.specifiedAttList):
             clRefs = sorted(classifier.specifiedAttList)
-            selfRefs = sorted(classifier.specifiedAttList)
+            selfRefs = sorted(self.specifiedAttList)
             if clRefs == selfRefs:
                 for i in range(len(classifier.specifiedAttList)):
                     tempIndex = self.specifiedAttList.index(classifier.specifiedAttList[i])
@@ -302,7 +302,7 @@ class Classifier:
 
     def mutateAction(self,xcs):
         changed = False
-        if random() < xcs.p_mutation:
+        if random.random() < xcs.p_mutation:
             action = random.choice(xcs.env.formatData.phenotypeList)
             while action == self.action:
                 action = random.choice(xcs.env.formatData.phenotypeList)

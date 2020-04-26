@@ -12,8 +12,6 @@ class PredictionArray:
         for eachClass in self.actionList:
             self.predictionArray[eachClass] = 0.0
             self.fitnesses[eachClass] = 0.0
-            self.tieBreak_Numerosity[eachClass] = 0.0
-            self.tieBreak_TimeStamp[eachClass] = 0.0
 
         for ref in population.matchSet:
             cl = population.popSet[ref]

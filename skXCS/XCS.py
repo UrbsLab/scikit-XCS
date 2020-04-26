@@ -145,10 +145,10 @@ class XCS(BaseEstimator,ClassifierMixin):
                     raise Exception("p_explore param must be float from 0 - 1")
 
                 #theta_matching
-                if not self.checkIsInt(theta_matching):
+                if not self.checkIsInt(theta_matching) and theta_matching != None:
                     raise Exception("theta_matching param must be nonnegative integer")
 
-                if theta_matching < 0:
+                if theta_matching != None and theta_matching < 0:
                     raise Exception("theta_matching param must be nonnegative integer")
 
                 #doGASubsumption
@@ -304,7 +304,7 @@ class XCS(BaseEstimator,ClassifierMixin):
             self.trackingFrequency = self.env.formatData.numTrainInstances
 
         self.timer = Timer()
-        self.population = ClassifierSet(self)
+        self.population = ClassifierSet()
         self.iterationCount = 0
         self.numCorrectGuessesDuringExploit = 0
         self.numExploitCycles = 0
@@ -478,10 +478,10 @@ class XCS(BaseEstimator,ClassifierMixin):
                     a.append(classifier.fitness)
                     a.append(classifier.prediction)
                     a.append(classifier.predictionError)
-                    a.append(classifier.accuracy)
+                    a.append(classifier.getAccuracy(self))
                     a.append(classifier.numerosity)
                     a.append(classifier.actionSetSize)
-                    a.append(classifier.timeStampGA)
+                    a.append(classifier.timestampGA)
                     a.append(classifier.initTimeStamp)
                     a.append(len(classifier.specifiedAttList) / numAttributes)
                     a.append(classifier.deletionProb)
@@ -544,10 +544,10 @@ class XCS(BaseEstimator,ClassifierMixin):
                     a.append(classifier.fitness)
                     a.append(classifier.prediction)
                     a.append(classifier.predictionError)
-                    a.append(classifier.accuracy)
+                    a.append(classifier.getAccuracy(self))
                     a.append(classifier.numerosity)
                     a.append(classifier.actionSetSize)
-                    a.append(classifier.timeStampGA)
+                    a.append(classifier.timestampGA)
                     a.append(classifier.initTimeStamp)
                     a.append(len(classifier.specifiedAttList) / numAttributes)
                     a.append(classifier.deletionProb)
@@ -568,25 +568,25 @@ class XCS(BaseEstimator,ClassifierMixin):
         if self.hasTrained:
             numCovered = 0
             originalTrainingData = self.env.formatData.savedRawTrainingData
-            for instance in originalTrainingData[0]:
-                state = originalTrainingData[0][instance]
+            for state in originalTrainingData[0]:
                 self.population.makeEvaluationMatchSet(state, self)
                 predictionArray = PredictionArray(self.population, self)
                 if predictionArray.hasMatch:
                     numCovered += 1
+                self.population.clearSets()
             return numCovered/len(originalTrainingData[0])
         else:
             raise Exception("There is no final instance coverage to return, as the eLCS model has not been trained")
 
     def getFinalAttributeSpecificityList(self):
         if self.hasTrained:
-            return self.population.getAttributeSpecificityList()
+            return self.population.getAttributeSpecificityList(self)
         else:
             raise Exception("There is no final attribute specificity list to return, as the eLCS model has not been trained")
 
     def getFinalAttributeAccuracyList(self):
         if self.hasTrained:
-            return self.population.getAttributeAccuracyList()
+            return self.population.getAttributeAccuracyList(self)
         else:
             raise Exception("There is no final attribute accuracy list to return, as the eLCS model has not been trained")
 

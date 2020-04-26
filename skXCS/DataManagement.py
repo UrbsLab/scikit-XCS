@@ -56,7 +56,7 @@ class DataManagement:
                         stateDict[target] = 1
                     currentInstanceIndex+=1
 
-                if len(list(stateDict.keys())) > elcs.discreteAttributeLimit:
+                if len(list(stateDict.keys())) > xcs.discreteAttributeLimit:
                     attIsDiscrete = False
             elif xcs.discreteAttributeLimit == "c":
                 if att in xcs.specifiedAttributes:

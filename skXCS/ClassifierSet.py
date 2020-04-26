@@ -31,12 +31,16 @@ class ClassifierSet:
             doCovering = totalNumActions - len(actionsNotCovered) < xcs.theta_matching
 
         while doCovering:
-            action = random.choice(actionsNotCovered)
-            coveredClassifier = Classifier(self)
+            if len(actionsNotCovered) != 0:
+                action = random.choice(actionsNotCovered)
+            else:
+                action = random.choice(copy.deepcopy(xcs.env.formatData.phenotypeList))
+            coveredClassifier = Classifier(xcs)
             coveredClassifier.initializeWithMatchingStateAndGivenAction(matchSetSize,state,action,xcs)
             self.addClassifierToPopulation(xcs,coveredClassifier,True)
             self.matchSet.append(len(self.popSet)-1)
-            actionsNotCovered.remove(action)
+            if len(actionsNotCovered) != 0:
+                actionsNotCovered.remove(action)
             xcs.trackingObj.coveringCount += 1
 
             doCovering = totalNumActions - len(actionsNotCovered) < xcs.theta_matching
@@ -47,7 +51,7 @@ class ClassifierSet:
 
     def getIdenticalClassifier(self,xcs,newClassifier):
         for classifier in self.popSet:
-            if newClassifier.equals(xcs,classifier):
+            if newClassifier.equals(classifier):
                 return classifier
         return None
 
@@ -97,13 +101,15 @@ class ClassifierSet:
         i = 0
         for clRef in self.actionSet:
             classifier = self.popSet[clRef]
-            accuracies.append(classifier.getAccuracy())
+            accuracies.append(classifier.getAccuracy(xcs))
             accuracySum = accuracySum + accuracies[i]*classifier.numerosity
             i+=1
 
+        i = 0
         for clRef in self.actionSet:
             classifier = self.popSet[clRef]
             classifier.updateFitness(accuracySum,accuracies[i],xcs)
+            i+=1
 
     ####Action Set Subsumption####
     def doActionSetSubsumption(self,xcs):
@@ -165,6 +171,7 @@ class ClassifierSet:
         childClassifier2 = Classifier(xcs)
         childClassifier2.initializeWithParentClassifier(parentClassifier2)
 
+        changedByCrossover = False
         if not childClassifier1.equals(childClassifier2) and random.random() < xcs.p_crossover:
             changedByCrossover = childClassifier1.uniformCrossover(childClassifier2,xcs)
 
@@ -219,7 +226,7 @@ class ClassifierSet:
         sumCl = 0
         numSum = 0
         for ref in self.actionSet:
-            sumCl += self.popSet[ref].timeStampGA * self.popSet[ref].numerosity
+            sumCl += self.popSet[ref].timestampGA * self.popSet[ref].numerosity
             numSum += self.popSet[ref].numerosity
         if numSum != 0:
             return sumCl/float(numSum)
@@ -246,7 +253,7 @@ class ClassifierSet:
         setList = self.actionSet
 
         for i in range(2):
-            tSize = int(len(setList) * xcs.theta_sel)
+            tSize = int(len(setList) * xcs.theta_select)
             possibleClassifiers = random.sample(setList, tSize)
 
             bestFitness = 0
@@ -256,12 +263,12 @@ class ClassifierSet:
                     bestFitness = self.popSet[j].fitness
                     bestClassifier = j
             selectList[i] = self.popSet[bestClassifier]
-        return setList
+        return selectList
 
     ####Deletion####
     def deletion(self,xcs):
         xcs.timer.startTimeDeletion()
-        while (self.microPopSize < xcs.N):
+        while (self.microPopSize > xcs.N):
             self.deleteFromPopulation(xcs)
         xcs.timer.stopTimeDeletion()
 
@@ -302,7 +309,7 @@ class ClassifierSet:
     def clearSets(self):
         """ Clears out references in the match and correct sets for the next learning iteration. """
         self.matchSet = []
-        self.correctSet = []
+        self.actionSet = []
 
     ####Evaluation####
     def makeEvaluationMatchSet(self,state,xcs):
@@ -329,6 +336,7 @@ class ClassifierSet:
         for cl in self.popSet:
             for ref in cl.specifiedAttList:
                 attributeSpecList[ref] += cl.numerosity
+        return attributeSpecList
 
     def getAttributeAccuracyList(self,xcs): #To be changed for XCS
         attributeAccList = []
@@ -336,5 +344,6 @@ class ClassifierSet:
             attributeAccList.append(0.0)
         for cl in self.popSet:
             for ref in cl.specifiedAttList:
-                attributeAccList[ref] += cl.numerosity * cl.accuracy
+                attributeAccList[ref] += cl.numerosity * cl.getAccuracy(xcs)
+        return attributeAccList
 
