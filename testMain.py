@@ -7,7 +7,7 @@ import random
 import numpy as np
 from sklearn.model_selection import cross_val_score
 
-converter = StringEnumerator("test/DataSets/Real/Multiplexer11Modified.csv","Class")
+converter = StringEnumerator("test/DataSets/Real/ContinuousAndNonBinaryDiscreteAttributesMissing.csv","Class")
 headers,classLabel,dataFeatures,dataActions = converter.getParams()
 
 #Shuffle Data Before CV

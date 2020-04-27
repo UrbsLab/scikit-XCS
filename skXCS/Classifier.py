@@ -69,7 +69,7 @@ class Classifier:
     def createMatchingAttribute(self,xcs,attRef,state):
         attributeInfoType = xcs.env.formatData.attributeInfoType[attRef]
         if attributeInfoType:
-            attributeInfoValue = elcs.env.formatData.attributeInfoContinuous[attRef]
+            attributeInfoValue = xcs.env.formatData.attributeInfoContinuous[attRef]
 
         # Continuous attribute
         if attributeInfoType:
