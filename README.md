@@ -8,7 +8,7 @@ This version of scikit-XCS is suitable for single step, classification problems.
 
 <ul>
   <li>Feature sets that are discrete/categorical, continuous-valued or a mix of both</li>
-  <li>Data with missing values/li>
+  <li>Data with missing values</li>
   <li>Binary Classification Problems (Binary Endpoints)</li>
   <li>Multi-class Classification Problems (Multi-class Endpoints)</li>
 </ul>
