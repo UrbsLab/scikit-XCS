@@ -3,9 +3,6 @@ import numpy as np
 
 class IterationRecord():
     '''
-    IterationRecord keeps track of all relevant data that comes with each iteration if the evalWhileFit param is True in eLCS object.
-    It also allows for easy access to data via access methods and export to CSV options
-
     IterationRecord Tracks 1 dictionary:
     1) Tracking Dict: Cursory Iteration Evaluation. Frequency determined by trackingFrequency param in eLCS. For each iteration evaluated, it saves:
         KEY-iteration number
@@ -53,3 +50,4 @@ class IterationRecord():
 
             for k,v in sorted(self.trackingDict.items()):
                 writer.writerow([k,v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8],v[9],v[10],v[11],v[12],v[13],v[14],v[15],v[16],v[17]])
+        file.close()

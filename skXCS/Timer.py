@@ -9,6 +9,7 @@ class Timer:
         # Global Time objects
         self.globalStartRef = time.time()
         self.globalTime = 0.0
+        self.globalAdd = 0
 
         # Match Time Variables
         self.startRefMatching = 0.0
@@ -87,5 +88,5 @@ class Timer:
 
     def updateGlobalTimer(self):
         """ Set the global end timer, call at very end of algorithm. """
-        self.globalTime = (time.time() - self.globalStartRef)
+        self.globalTime = (time.time() - self.globalStartRef) + self.globalAdd
         return self.globalTime

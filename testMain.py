@@ -7,25 +7,33 @@ import random
 import numpy as np
 from sklearn.model_selection import cross_val_score
 
-converter = StringEnumerator("test/DataSets/Real/ContinuousAndNonBinaryDiscreteAttributesMissing.csv","Class")
+converter = StringEnumerator("test/DataSets/Real/Multiplexer11Modified.csv","Class")
 headers,classLabel,dataFeatures,dataActions = converter.getParams()
 
-#Shuffle Data Before CV
-formatted = np.insert(dataFeatures,dataFeatures.shape[1],dataActions,1)
-np.random.shuffle(formatted)
-dataFeatures = np.delete(formatted,-1,axis=1)
-dataActions = formatted[:,-1]
-
-model = XCS(learningIterations=10000,N=1000)
-#print(np.mean(cross_val_score(model,dataFeatures,dataActions,cv=3)))
-
+model = XCS(learningIterations=1500)
 model.fit(dataFeatures,dataActions)
 print(model.score(dataFeatures,dataActions))
-model.exportIterationTrackingDataToCSV("defaultExportDir/tracking.csv")
 model.exportFinalRulePopulation("defaultExportDir/rulePop.csv",headers,classLabel)
-model.exportFinalRulePopulationDCAL("defaultExportDir/rulePopDCAL.csv",headers,classLabel)
-print(model.predict_proba(dataFeatures))
-print(model.getFinalInstanceCoverage())
-print(model.getFinalTrainingAccuracy())
-print(model.getFinalAttributeAccuracyList())
-print(model.getFinalAttributeSpecificityList())
+model.exportIterationTrackingDataToCSV('defaultExportDir/tracking.csv')
+model.pickleModel('defaultExportDir/pickled')
+
+model2 = XCS(learningIterations=1500,rebootFilename='defaultExportDir/pickled')
+model2.fit(dataFeatures,dataActions)
+print(model2.score(dataFeatures,dataActions))
+model2.exportFinalRulePopulation("defaultExportDir/rulePop2.csv",headers,classLabel)
+model2.exportIterationTrackingDataToCSV('defaultExportDir/tracking2.csv')
+model2.pickleModel('defaultExportDir/pickled2')
+
+model3 = XCS(learningIterations=2000,rebootFilename='defaultExportDir/pickled2')
+model3.fit(dataFeatures,dataActions)
+print(model3.score(dataFeatures,dataActions))
+model3.exportFinalRulePopulation("defaultExportDir/rulePop3.csv",headers,classLabel)
+model3.exportIterationTrackingDataToCSV('defaultExportDir/tracking3.csv')
+
+
+
+# print(model.predict_proba(dataFeatures))
+# print(model.getFinalInstanceCoverage())
+# print(model.getFinalTrainingAccuracy())
+# print(model.getFinalAttributeAccuracyList())
+# print(model.getFinalAttributeSpecificityList())

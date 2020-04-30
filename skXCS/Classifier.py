@@ -312,10 +312,10 @@ class Classifier:
 
     def getDelProp(self,meanFitness,xcs):
         if self.fitness / self.numerosity >= xcs.delta * meanFitness or self.experience < xcs.theta_del:
-            self.deletionVote = self.actionSetSize * self.numerosity
+            deletionVote = self.actionSetSize * self.numerosity
 
         elif self.fitness == 0.0:
-            self.deletionVote = self.actionSetSize * self.numerosity * meanFitness / (xcs.init_fit / self.numerosity)
+            deletionVote = self.actionSetSize * self.numerosity * meanFitness / (xcs.init_fit / self.numerosity)
         else:
-            self.deletionVote = self.actionSetSize * self.numerosity * meanFitness / (self.fitness / self.numerosity)
-        return self.deletionVote
+            deletionVote = self.actionSetSize * self.numerosity * meanFitness / (self.fitness / self.numerosity)
+        return deletionVote

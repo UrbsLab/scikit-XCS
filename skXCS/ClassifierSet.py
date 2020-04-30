@@ -280,8 +280,10 @@ class ClassifierSet:
             vote = classifier.getDelProp(meanFitness,xcs)
             deletionProbSum += vote
             voteList.append(vote)
+        i = 0
         for classifier in self.popSet:
-            classifier.deletionProb = classifier.deletionVote/deletionProbSum
+            classifier.deletionProb = voteList[i]/deletionProbSum
+            i+=1
 
         choicePoint = deletionProbSum * random.random()
         newSum = 0

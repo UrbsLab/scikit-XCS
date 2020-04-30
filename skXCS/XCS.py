@@ -11,12 +11,14 @@ import random
 import numpy as np
 import csv
 import copy
+import pickle
+import time
 
 class XCS(BaseEstimator,ClassifierMixin):
-    def __init__(self,learningIterations=10000,N=1000,p_general=0.5,beta=0.15,alpha=0.1,e_0=10,nu=5,theta_GA=25,p_crossover=0.8,p_mutation=0.04,
+    def __init__(self,learningIterations=10000,N=1000,p_general=0.5,beta=0.2,alpha=0.1,e_0=10,nu=5,theta_GA=25,p_crossover=0.8,p_mutation=0.04,
                  theta_del=20,delta=0.1,init_prediction=10,init_e=0,init_fitness=0.01,p_explore=0.5,theta_matching=None,doGASubsumption=True,
-                 doActionSetSubsumption=True,maxPayoff=1000,theta_sub=20,theta_select=0.5,discreteAttributeLimit=10,specifiedAttributes=np.array([]),
-                 randomSeed="none",predictionErrorReduction=0.25,fitnessReduction=0.1,trackingFrequency=0,evalWhileFit=False):
+                 doActionSetSubsumption=False,maxPayoff=1000,theta_sub=20,theta_select=0.5,discreteAttributeLimit=10,specifiedAttributes=np.array([]),
+                 randomSeed="none",predictionErrorReduction=0.25,fitnessReduction=0.1,rebootFilename=None):
 
                 '''
                 :param learningIterations:          Must be nonnegative integer. The number of explore or exploit learning iterations to run
@@ -26,21 +28,21 @@ class XCS(BaseEstimator,ClassifierMixin):
                 :param alpha:                       Must be float. The fall of rate in the fitness evaluation
                 :param e_0:                         Must be float. The error threshold under which accuracy of a classifier can be set to 1
                 :param nu:                          Must be float. Power parameter for fitness evaluation
-                :param theta_GA:                    Must be nonnegative float. The threshold for the GA application in an action set.
-                :param p_crossover:                 Must be float from 0 - 1. The probability of applying crossover in an offspring classifier.
-                :param p_mutation:                  Must be float from 0 - 1. The probability of mutating one allele and the action in an offspring classifier.
-                :param theta_del:                   Must be nonnegative integer. Specified the threshold over which the fitness of a classifier may be considered in its deletion probability.
-                :param delta:                       Must be float. The fraction of the mean fitness of the population below which the fitness of a classifier may be considered in its vote for deletion.
-                :param init_prediction:             Must be float. The initial prediction value when generating a new classifier (e.g in covering).
-                :param init_e:                      Must be float. The initial prediction error value when generating a new classifier (e.g in covering).
-                :param init_fitness:                Must be float. The initial prediction value when generating a new classifier (e.g in covering).
+                :param theta_GA:                    Must be nonnegative float. The threshold for the GA application in an action set
+                :param p_crossover:                 Must be float from 0 - 1. The probability of applying crossover in an offspring classifier
+                :param p_mutation:                  Must be float from 0 - 1. The probability of mutating one allele and the action in an offspring classifier
+                :param theta_del:                   Must be nonnegative integer. Specified the threshold over which the fitness of a classifier may be considered in its deletion probability
+                :param delta:                       Must be float. The fraction of the mean fitness of the population below which the fitness of a classifier may be considered in its vote for deletion
+                :param init_prediction:             Must be float. The initial prediction value when generating a new classifier (e.g in covering)
+                :param init_e:                      Must be float. The initial prediction error value when generating a new classifier (e.g in covering)
+                :param init_fitness:                Must be float. The initial prediction value when generating a new classifier (e.g in covering)
                 :param p_explore:                   Must be float from 0 - 1. Probability of doing an explore cycle instead of an exploit cycle
                 :param theta_matching:              Must be nonnegative integer. Number of unique actions that must be represented in the match set (otherwise, covering)
                 :param doGASubsumption:             Must be boolean. Do subsumption in GA
                 :param doActionSetSubsumption:      Must be boolean. Do subsumption in [A]
                 :param maxPayoff:                   Must be float. For single step problems, what the maximum reward for correctness
-                :param theta_sub:                   Must be nonnegative integer. The experience of a classifier required to be a subsumer.
-                :param theta_select:                Must be float from 0 - 1. The fraction of the action set to be included in tournament selection.
+                :param theta_sub:                   Must be nonnegative integer. The experience of a classifier required to be a subsumer
+                :param theta_select:                Must be float from 0 - 1. The fraction of the action set to be included in tournament selection
                 :param discreteAttributeLimit:      Must be nonnegative integer OR "c" OR "d". Multipurpose param. If it is a nonnegative integer, discreteAttributeLimit determines the threshold that determines
                                                     if an attribute will be treated as a continuous or discrete attribute. For example, if discreteAttributeLimit == 10, if an attribute has more than 10 unique
                                                     values in the dataset, the attribute will be continuous. If the attribute has 10 or less unique values, it will be discrete. Alternatively,
@@ -49,11 +51,9 @@ class XCS(BaseEstimator,ClassifierMixin):
                                                     If "c", attributes specified by index in this param will be continuous and the rest will be discrete. If "d", attributes specified by index in this
                                                     param will be discrete and the rest will be continuous.
                 :param randomSeed:                  Must be an integer or "none". Set a constant random seed value to some integer (in order to obtain reproducible results). Put 'none' if none (for pseudo-random algorithm runs)
-                :param predictionErrorReduction:    Must be float. The reduction of the prediction error when generating an offspring classifier.
-                :param fitnessReduction:            Must be float. The reduction of the fitness when generating an offspring classifier.
-                :param trackingFrequency:           Must be nonnegative integer. Relevant only if evalWhileFit param is true. Conducts accuracy approximations and population measurements every trackingFrequency iterations.
-                                                    If param == 0, tracking done once every epoch.
-                :param evalWhileFit:                Must be boolean. Determines if live tracking and evaluation is done during model training
+                :param predictionErrorReduction:    Must be float. The reduction of the prediction error when generating an offspring classifier
+                :param fitnessReduction:            Must be float. The reduction of the fitness when generating an offspring classifier
+                :param rebootFilename:    Must be String or None. Filename of model to be rebooted
                 '''
 
                 #learningIterations
@@ -192,6 +192,12 @@ class XCS(BaseEstimator,ClassifierMixin):
                 if not (isinstance(specifiedAttributes, np.ndarray)):
                     raise Exception("specifiedAttributes param must be ndarray")
 
+                for spAttr in specifiedAttributes:
+                    if not self.checkIsInt(spAttr):
+                        raise Exception("All specifiedAttributes elements param must be nonnegative integers")
+                    if int(spAttr) < 0:
+                        raise Exception("All specifiedAttributes elements param must be nonnegative integers")
+
                 #predictionErrorReduction
                 if not self.checkIsFloat(predictionErrorReduction):
                     raise Exception("predictionErrorReduction param must be float")
@@ -200,16 +206,9 @@ class XCS(BaseEstimator,ClassifierMixin):
                 if not self.checkIsFloat(fitnessReduction):
                     raise Exception("fitnessReduction param must be float")
 
-                #trackingFrequency
-                if not self.checkIsInt(trackingFrequency):
-                    raise Exception("trackingFrequency param must be nonnegative integer")
-
-                if trackingFrequency < 0:
-                    raise Exception("trackingFrequency param must be nonnegative integer")
-
-                #evalWhileFit
-                if not (isinstance(evalWhileFit, bool)):
-                    raise Exception("evalWhileFit param must be boolean")
+                #rebootPopulationFilename
+                if rebootFilename != None and not isinstance(rebootFilename,str):
+                    raise Exception("rebootFilename param must be None or String from pickle")
 
                 # randomSeed
                 if randomSeed != "none":
@@ -248,12 +247,11 @@ class XCS(BaseEstimator,ClassifierMixin):
                 self.randomSeed = randomSeed
                 self.predictionErrorReduction = predictionErrorReduction
                 self.fitnessReduction = fitnessReduction
-                self.trackingFrequency = trackingFrequency
-                self.evalWhileFit = evalWhileFit
 
                 self.hasTrained = False
                 self.trackingObj = tempTrackingObj()
                 self.record = IterationRecord()
+                self.rebootFilename = rebootFilename
 
     def checkIsInt(self, num):
         try:
@@ -274,7 +272,7 @@ class XCS(BaseEstimator,ClassifierMixin):
 
     ##*************** Fit ****************
     def fit(self,X,y):
-        """Scikit-learn required: Supervised training of eLCS
+        """Scikit-learn required: Supervised training of XCS
             Parameters
             X: array-like {n_samples, n_features} Training instances. ALL INSTANCE ATTRIBUTES MUST BE NUMERIC or NAN
             y: array-like {n_samples} Training labels. ALL INSTANCE PHENOTYPES MUST BE NUMERIC NOT NAN OR OTHER TYPE
@@ -300,16 +298,19 @@ class XCS(BaseEstimator,ClassifierMixin):
 
         if self.theta_matching == None:
             self.theta_matching = self.env.formatData.numberOfActions
-        if self.trackingFrequency == 0:
-            self.trackingFrequency = self.env.formatData.numTrainInstances
 
-        self.timer = Timer()
-        self.population = ClassifierSet()
         self.iterationCount = 0
-        self.numCorrectGuessesDuringExploit = 0
-        self.numExploitCycles = 0
-        trackedAccuracy = 0
+
+        self.trackedAccuracy = []
+        self.movingAvgCount = 50
         aveGenerality = 0
+        aveGeneralityFreq = min(self.env.formatData.numTrainInstances,int(self.learningIterations/20)+1)
+
+        if self.rebootFilename == None:
+            self.timer = Timer()
+            self.population = ClassifierSet()
+        else:
+            self.rebootPopulation()
 
         while self.iterationCount < self.learningIterations:
             state = self.env.getTrainState()
@@ -318,14 +319,14 @@ class XCS(BaseEstimator,ClassifierMixin):
             #Basic Evaluation
             self.timer.updateGlobalTimer()
             self.timer.startTimeEvaluation()
-            if self.iterationCount%self.trackingFrequency == (self.trackingFrequency-1):
-                if self.evalWhileFit:
-                    aveGenerality = self.population.getAveGenerality(self)
-                if self.numExploitCycles != 0:
-                    trackedAccuracy = self.numCorrectGuessesDuringExploit/self.numExploitCycles
-                self.numCorrectGuessesDuringExploit = 0
-                self.numExploitCycles = 0
-            self.record.addToTracking(self.iterationCount,trackedAccuracy,aveGenerality,
+            if self.iterationCount%aveGeneralityFreq == (aveGeneralityFreq-1):
+                aveGenerality = self.population.getAveGenerality(self)
+
+            if len(self.trackedAccuracy) != 0:
+                accuracy = sum(self.trackedAccuracy)/len(self.trackedAccuracy)
+            else:
+                accuracy = 0
+            self.record.addToTracking(self.iterationCount,accuracy,aveGenerality,
                                       self.trackingObj.macroPopSize,self.trackingObj.microPopSize,
                                       self.trackingObj.matchSetSize, self.trackingObj.actionSetSize,
                                       self.trackingObj.avgIterAge, self.trackingObj.subsumptionCount,
@@ -339,7 +340,7 @@ class XCS(BaseEstimator,ClassifierMixin):
 
             self.iterationCount += 1
             self.env.newInstance()
-
+        self.saveFinalMetrics()
         self.hasTrained = True
         return self
 
@@ -365,8 +366,13 @@ class XCS(BaseEstimator,ClassifierMixin):
             self.population.deletion(self)
 
             if reward == self.maxPayoff:
-                self.numCorrectGuessesDuringExploit += 1
-            self.numExploitCycles += 1
+                if len(self.trackedAccuracy) == self.movingAvgCount:
+                    del self.trackedAccuracy[0]
+                self.trackedAccuracy.append(1)
+            else:
+                if len(self.trackedAccuracy) == self.movingAvgCount:
+                    del self.trackedAccuracy[0]
+                self.trackedAccuracy.append(0)
 
         self.trackingObj.avgIterAge = self.iterationCount - self.population.getInitStampAverage()
         self.trackingObj.macroPopSize = len(self.population.popSet)
@@ -375,9 +381,49 @@ class XCS(BaseEstimator,ClassifierMixin):
         self.trackingObj.actionSetSize = len(self.population.actionSet)
         self.population.clearSets()
 
+    ##*************** Population Reboot ****************
+    def saveFinalMetrics(self):
+        self.finalMetrics = [self.learningIterations,self.timer.globalTime, self.timer.globalMatching,
+                             self.timer.globalDeletion, self.timer.globalSubsumption, self.timer.globalGA,
+                             self.timer.globalEvaluation,copy.deepcopy(self.population.popSet)]
+
+    def pickleModel(self,filename=None):
+        if self.hasTrained:
+            if filename == None:
+                filename = 'pickled'+str(int(time.time()))
+            outfile = open(filename,'wb')
+            pickle.dump(self.finalMetrics,outfile)
+            outfile.close()
+        else:
+            raise Exception("There is model to pickle, as the XCS model has not been trained")
+
+    def rebootPopulation(self):
+        #Sets popSet and microPopSize of self.population, as well as trackingMetrics,
+        file = open(self.rebootFilename,'rb')
+        rawData = pickle.load(file)
+        file.close()
+
+        popSet = rawData[7]
+        microPopSize = 0
+        for rule in popSet:
+            microPopSize += rule.numerosity
+        set = ClassifierSet()
+        set.popSet = popSet
+        set.microPopSize = microPopSize
+        self.population = set
+        self.timer = Timer()
+        self.timer.globalAdd = rawData[1]
+        self.timer.globalMatching = rawData[2]
+        self.timer.globalDeletion = rawData[3]
+        self.timer.globalSubsumption = rawData[4]
+        self.timer.globalGA = rawData[5]
+        self.timer.globalEvaluation = rawData[6]
+        self.learningIterations += rawData[0]
+        self.iterationCount += rawData[0]
+
     ##*************** Predict and Score ****************
     def predict(self,X):
-        """Scikit-learn required: Test Accuracy of eLCS
+        """Scikit-learn required: Test Accuracy of XCS
             Parameters
             X: array-like {n_samples, n_features} Test instances to classify. ALL INSTANCE ATTRIBUTES MUST BE NUMERIC
             Returns
@@ -403,7 +449,7 @@ class XCS(BaseEstimator,ClassifierMixin):
         return np.array(predictionList)
 
     def predict_proba(self,X):
-        """Scikit-learn required: Test Accuracy of eLCS
+        """Scikit-learn required: Test Accuracy of XCS
             Parameters
             X: array-like {n_samples, n_features} Test instances to classify. ALL INSTANCE ATTRIBUTES MUST BE NUMERIC
             Returns
@@ -433,11 +479,11 @@ class XCS(BaseEstimator,ClassifierMixin):
         return balanced_accuracy_score(y,predictionList)
 
     ##*************** Export and Evaluation ****************
-    def exportIterationTrackingDataToCSV(self,filename='iterationData.csv'):
+    def exportIterationTrackingData(self,filename='iterationData.csv'):
         if self.hasTrained:
             self.record.exportTrackingToCSV(filename)
         else:
-            raise Exception("There is no tracking data to export, as the eLCS model has not been trained")
+            raise Exception("There is no tracking data to export, as the XCS model has not been trained")
 
     def exportFinalRulePopulation(self,filename='rulePopulation.csv',headerNames=np.array([]),className="Action"):
         if self.hasTrained:
@@ -488,8 +534,9 @@ class XCS(BaseEstimator,ClassifierMixin):
                     a.append(classifier.experience)
                     a.append(classifier.matchCount)
                     writer.writerow(a)
+            file.close()
         else:
-            raise Exception("There is no rule population to export, as the eLCS model has not been trained")
+            raise Exception("There is no rule population to export, as the XCS model has not been trained")
 
     def exportFinalRulePopulationDCAL(self,filename='rulePopulationDCAL.csv',headerNames=np.array([]),className="Action"):
         if self.hasTrained:
@@ -537,7 +584,6 @@ class XCS(BaseEstimator,ClassifierMixin):
 
                     a.append(valueString[:-2])
                     a.append(headerString[:-2])
-                    a.append(classifier.action)
 
                     # Add statistics
                     a.append(classifier.action)
@@ -554,15 +600,16 @@ class XCS(BaseEstimator,ClassifierMixin):
                     a.append(classifier.experience)
                     a.append(classifier.matchCount)
                     writer.writerow(a)
+            file.close()
         else:
-            raise Exception("There is no rule population to export, as the eLCS model has not been trained")
+            raise Exception("There is no rule population to export, as the XCS model has not been trained")
 
     def getFinalTrainingAccuracy(self):
         if self.hasTrained:
             originalTrainingData = self.env.formatData.savedRawTrainingData
             return self.score(originalTrainingData[0],originalTrainingData[1])
         else:
-            raise Exception("There is no final training accuracy to return, as the eLCS model has not been trained")
+            raise Exception("There is no final training accuracy to return, as the XCS model has not been trained")
 
     def getFinalInstanceCoverage(self):
         if self.hasTrained:
@@ -576,19 +623,19 @@ class XCS(BaseEstimator,ClassifierMixin):
                 self.population.clearSets()
             return numCovered/len(originalTrainingData[0])
         else:
-            raise Exception("There is no final instance coverage to return, as the eLCS model has not been trained")
+            raise Exception("There is no final instance coverage to return, as the XCS model has not been trained")
 
     def getFinalAttributeSpecificityList(self):
         if self.hasTrained:
             return self.population.getAttributeSpecificityList(self)
         else:
-            raise Exception("There is no final attribute specificity list to return, as the eLCS model has not been trained")
+            raise Exception("There is no final attribute specificity list to return, as the XCS model has not been trained")
 
     def getFinalAttributeAccuracyList(self):
         if self.hasTrained:
             return self.population.getAttributeAccuracyList(self)
         else:
-            raise Exception("There is no final attribute accuracy list to return, as the eLCS model has not been trained")
+            raise Exception("There is no final attribute accuracy list to return, as the XCS model has not been trained")
 
 class tempTrackingObj():
     #Tracks stats of every iteration (except accuracy, avg generality, and times)
