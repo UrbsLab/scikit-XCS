@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a4fffcf7-d6fd-4b8f-bbb7-07b66f060141" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_XCS.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_XCS.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testMain.py" beforeDir="false" />
-    </list>
+    <list default="true" id="a4fffcf7-d6fd-4b8f-bbb7-07b66f060141" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,8 +97,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="334">
-              <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
+            <state relative-caret-position="540">
+              <caret line="36" column="35" lean-forward="true" selection-start-line="36" selection-start-column="35" selection-end-line="36" selection-end-column="35" />
               <folding>
                 <element signature="e#2#21#0" expanded="true" />
               </folding>
@@ -238,7 +233,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.testMain">
+  <component name="RunManager" selected="Python tests.Unittests in test_XCS.py">
     <configuration name="testMain" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="scikit-XCS" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -320,14 +315,11 @@
       <workItem from="1588178389205" duration="2879000" />
       <workItem from="1588241373861" duration="3911000" />
       <workItem from="1588248030605" duration="4324000" />
-      <workItem from="1588256322027" duration="4002000" />
+      <workItem from="1588256322027" duration="4422000" />
     </task>
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Unittests_in_test_XCS_py - 2020.04.30 at 08h 16m 56s.xml">
-      <configuration name="Unittests in test_XCS.py" configurationId="tests" />
-    </history-entry>
     <history-entry file="Unittests_in_test_XCS_py - 2020.04.30 at 08h 17m 19s.xml">
       <configuration name="Unittests in test_XCS.py" configurationId="tests" />
     </history-entry>
@@ -355,15 +347,18 @@
     <history-entry file="Unittests_in_test_XCS_py - 2020.04.30 at 08h 48m 13s.xml">
       <configuration name="Unittests in test_XCS.py" configurationId="tests" />
     </history-entry>
+    <history-entry file="Unittests_in_test_XCS_py - 2020.04.30 at 12h 08m 01s.xml">
+      <configuration name="Unittests in test_XCS.py" configurationId="tests" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="75734000" />
+    <option name="totallyTimeSpent" value="76154000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="20" y="23" width="1647" height="974" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26417446" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26417446" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -378,7 +373,7 @@
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Terminal" order="11" />
-      <window_info anchor="bottom" id="Python Console" order="12" visible="true" weight="0.34353742" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.34353742" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -390,7 +385,7 @@
     <option name="version" value="1" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/scikit_XCS$Unittests_in_test_XCS_py.coverage" NAME="Unittests in test_XCS.py Coverage Results" MODIFIED="1588250664012" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/scikit_XCS$Unittests_in_test_XCS_py.coverage" NAME="Unittests in test_XCS.py Coverage Results" MODIFIED="1588262733804" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/scikit_XCS$Unittests_in_test_StringEnumerator_py.coverage" NAME="Unittests in test_StringEnumerator.py Coverage Results" MODIFIED="1587837778544" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
   <component name="editorHistoryManager">
@@ -676,8 +671,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="334">
-          <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
+        <state relative-caret-position="540">
+          <caret line="36" column="35" lean-forward="true" selection-start-line="36" selection-start-column="35" selection-end-line="36" selection-end-column="35" />
           <folding>
             <element signature="e#2#21#0" expanded="true" />
           </folding>
