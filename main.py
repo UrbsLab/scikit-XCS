@@ -14,21 +14,21 @@ model = XCS(learningIterations=1500)
 model.fit(dataFeatures,dataActions)
 print(model.score(dataFeatures,dataActions))
 model.exportFinalRulePopulation("defaultExportDir/rulePop.csv",headers,classLabel)
-model.exportIterationTrackingDataToCSV('defaultExportDir/tracking.csv')
+model.exportIterationTrackingData('defaultExportDir/tracking.csv')
 model.pickleModel('defaultExportDir/pickled')
 
 model2 = XCS(learningIterations=1500,rebootFilename='defaultExportDir/pickled')
 model2.fit(dataFeatures,dataActions)
 print(model2.score(dataFeatures,dataActions))
 model2.exportFinalRulePopulation("defaultExportDir/rulePop2.csv",headers,classLabel)
-model2.exportIterationTrackingDataToCSV('defaultExportDir/tracking2.csv')
+model2.exportIterationTrackingData('defaultExportDir/tracking2.csv')
 model2.pickleModel('defaultExportDir/pickled2')
 
 model3 = XCS(learningIterations=2000,rebootFilename='defaultExportDir/pickled2')
 model3.fit(dataFeatures,dataActions)
 print(model3.score(dataFeatures,dataActions))
 model3.exportFinalRulePopulation("defaultExportDir/rulePop3.csv",headers,classLabel)
-model3.exportIterationTrackingDataToCSV('defaultExportDir/tracking3.csv')
+model3.exportIterationTrackingData('defaultExportDir/tracking3.csv')
 
 
 

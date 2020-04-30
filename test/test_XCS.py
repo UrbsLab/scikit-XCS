@@ -3,6 +3,11 @@ import numpy as np
 from skXCS.XCS import XCS
 from skXCS.StringEnumerator import StringEnumerator
 from sklearn.model_selection import cross_val_score
+import os
+
+THIS_DIR = os.path.dirname(os.path.abspath("test_eLCS.py"))
+if THIS_DIR[-4:] == 'test': #Patch that ensures testing from Scikit not test directory
+    THIS_DIR = THIS_DIR[:-5]
 
 class test_XCS(unittest.TestCase):
     #learningIterations (nonnegative integer)
@@ -611,57 +616,63 @@ class test_XCS(unittest.TestCase):
     #Performance Tests
     #6B MP 1000 iter training
     def test6BitMP1000Iterations(self):
-        converter = StringEnumerator('DataSets/Real/Multiplexer6Modified.csv',"Class")
+        dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer6Modified.csv")
+        converter = StringEnumerator(dataPath,"Class")
         headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
         clf = XCS(learningIterations=1000,N=500,nu=10)
         clf.fit(dataFeatures,dataPhenotypes)
         answer = 0.894
-        print("6 Bit 1000 Iter: "+str(clf.getFinalTrainingAccuracy()))
+        #print("6 Bit 1000 Iter: "+str(clf.getFinalTrainingAccuracy()))
         self.assertTrue(self.approxEqualOrBetter(0.2,clf.getFinalTrainingAccuracy(),answer,True))
 
     # 6B MP 5000 iter training
     def test6BitMP5000Iterations(self):
-        converter = StringEnumerator('DataSets/Real/Multiplexer6Modified.csv', "Class")
+        dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer6Modified.csv")
+        converter = StringEnumerator(dataPath, "Class")
         headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
         clf = XCS(learningIterations=5000, N=500, nu=10)
         clf.fit(dataFeatures, dataPhenotypes)
         answer = 1
-        print("6 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
+        #print("6 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
         self.assertTrue(self.approxEqualOrBetter(0.2, clf.getFinalTrainingAccuracy(), answer, True))
 
     #11B MP 5000 iter training
     def test11BitMP5000Iterations(self):
-        converter = StringEnumerator('DataSets/Real/Multiplexer11Modified.csv',"Class")
+        dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer11Modified.csv")
+        converter = StringEnumerator(dataPath,"Class")
         headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
         clf = XCS(learningIterations=5000,N=1000,nu=10)
         clf.fit(dataFeatures,dataPhenotypes)
         answer = 0.9514
-        print("11 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
+        #print("11 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
         self.assertTrue(self.approxEqualOrBetter(0.2,clf.getFinalTrainingAccuracy(),answer,True))
 
     #20B MP 5000 iter training
     def test20BitMP5000Iterations(self):
-        converter = StringEnumerator('DataSets/Real/Multiplexer20Modified.csv',"Class")
+        dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer20Modified.csv")
+        converter = StringEnumerator(dataPath,"Class")
         headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
         clf = XCS(learningIterations=5000,N=2000,nu=10)
         clf.fit(dataFeatures,dataPhenotypes)
         answer = 0.6634
-        print("20 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
+        #print("20 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
         self.assertTrue(self.approxEqualOrBetter(0.2,clf.getFinalTrainingAccuracy(),answer,True))
 
     #Continuous Valued 5000 iter training
     def testContValues5000Iterations(self):
-        converter = StringEnumerator('DataSets/Real/ContinuousAndNonBinaryDiscreteAttributes.csv',"Class")
+        dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/ContinuousAndNonBinaryDiscreteAttributes.csv")
+        converter = StringEnumerator(dataPath,"Class")
         headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
         clf = XCS(learningIterations=5000)
         clf.fit(dataFeatures,dataPhenotypes)
         answer = 0.64
-        print("Continuous Attributes 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
+        #print("Continuous Attributes 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
         self.assertTrue(self.approxEqualOrBetter(0.2,clf.getFinalTrainingAccuracy(),answer,True))
 
     #3-fold testing 6B MP 1000 iter
     def test6BitMPTesting1000Iterations(self):
-        converter = StringEnumerator('DataSets/Real/Multiplexer6Modified.csv',"Class")
+        dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer6Modified.csv")
+        converter = StringEnumerator(dataPath,"Class")
         headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
         formatted = np.insert(dataFeatures, dataFeatures.shape[1], dataPhenotypes, 1)
         np.random.shuffle(formatted)
@@ -672,12 +683,13 @@ class test_XCS(unittest.TestCase):
         score = np.mean(cross_val_score(clf, dataFeatures, dataPhenotypes, cv=3))
 
         answer = 0.9
-        print("6 Bit Testing 1000 Iter: "+str(score))
+        #print("6 Bit Testing 1000 Iter: "+str(score))
         self.assertTrue(self.approxEqualOrBetter(0.2,score,answer,True))
 
     #3-fold testing Continuous Valued + Missing 5000 iter
     def testContValuesAndMissingTesting5000Iterations(self):
-        converter = StringEnumerator('DataSets/Real/ContinuousAndNonBinaryDiscreteAttributesMissing.csv', "Class")
+        dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/ContinuousAndNonBinaryDiscreteAttributesMissing.csv")
+        converter = StringEnumerator(dataPath, "Class")
         headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
         formatted = np.insert(dataFeatures, dataFeatures.shape[1], dataPhenotypes, 1)
         np.random.shuffle(formatted)
@@ -688,7 +700,7 @@ class test_XCS(unittest.TestCase):
         score = np.mean(cross_val_score(clf, dataFeatures, dataPhenotypes, cv=3))
 
         answer = 0.5
-        print("Cont & Missing Testing 5000 Iter: " + str(score))
+        #print("Cont & Missing Testing 5000 Iter: " + str(score))
         self.assertTrue(self.approxEqualOrBetter(0.2, score, answer, True))
 
     #Random Seed Testing - Done
