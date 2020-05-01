@@ -298,6 +298,8 @@ class XCS(BaseEstimator,ClassifierMixin):
 
         if self.theta_matching == None:
             self.theta_matching = self.env.formatData.numberOfActions
+        if self.theta_matching > self.env.formatData.numberOfActions:
+            raise Exception("theta_matching param cannot be greater than the number of actions")
 
         self.iterationCount = 0
 
