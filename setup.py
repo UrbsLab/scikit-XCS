@@ -14,7 +14,7 @@ setup(
   author_email = 'robertzh@seas.upenn.edu,ryanurb@upenn.edu',
   url = 'https://github.com/UrbsLab/scikit-XCS',
   #download_url = 'https://github.com/UrbsLab/scikit-eLCS/archive/v_1.0.9.tar.gz',
-  keywords = ['machine learning','data analysis','data science','learning classifier systems'],
+  keywords = ['machine learning','data analysis','data science','learning classifier systems','xcs'],
   install_requires=['numpy','pandas','scikit-learn'],
   classifiers=[
     'Development Status :: 5 - Production/Stable',
