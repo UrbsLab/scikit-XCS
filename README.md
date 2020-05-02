@@ -45,8 +45,8 @@ import pandas as pd
 from sklearn.model_selection import cross_val_score
 
 #Load Data Using Pandas
-data = pd.read_csv('myDataFile.csv')
-dataFeatures = data.drop(actionLabel,axis=1).values
+data = pd.read_csv('myDataFile.csv') #REPLACE with your own dataset .csv filename
+dataFeatures = data.drop(actionLabel,axis=1).values #DEFINE actionLabel variable as the Str at the top of your dataset's action column
 dataActions = data[actionLabel].values
 
 #Shuffle Data Before CV
