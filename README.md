@@ -39,7 +39,7 @@ For more information on how to use scikit-XCS, please refer to the [scikit-XCS U
 ## Usage TLDR
 ```python
 #Import Necessary Packages/Modules
-from skXCS.XCS import XCS
+from skXCS import XCS
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import cross_val_score
