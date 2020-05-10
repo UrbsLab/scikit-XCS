@@ -5,7 +5,7 @@ class Environment:
     def __init__(self,X,y,xcs):
         self.dataRef = 0
         self.formatData = DataManagement(X,y,xcs)
-        self.maxPayoff = xcs.maxPayoff
+        self.max_payoff = xcs.max_payoff
 
         self.currentTrainState = self.formatData.trainFormatted[0][self.dataRef]
         self.currentTrainPhenotype = self.formatData.trainFormatted[1][self.dataRef]
@@ -28,6 +28,6 @@ class Environment:
 
     def executeAction(self,action):
         if action == self.currentTrainPhenotype:
-            return self.maxPayoff
+            return self.max_payoff
         return 0
 

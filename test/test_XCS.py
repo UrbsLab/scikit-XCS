@@ -10,25 +10,25 @@ if THIS_DIR[-4:] == 'test': #Patch that ensures testing from Scikit not test dir
     THIS_DIR = THIS_DIR[:-5]
 
 class test_XCS(unittest.TestCase):
-    #learningIterations (nonnegative integer)
+    #learning_iterations (nonnegative integer)
     def testParamLearningIterationsNonnumeric(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(learningIterations="hello")
-        self.assertTrue("learningIterations param must be nonnegative integer" in str(context.exception))
+            clf = XCS(learning_iterations="hello")
+        self.assertTrue("learning_iterations param must be nonnegative integer" in str(context.exception))
 
     def testParamLearningIterationsInvalidNumeric(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(learningIterations=3.3)
-        self.assertTrue("learningIterations param must be nonnegative integer" in str(context.exception))
+            clf = XCS(learning_iterations=3.3)
+        self.assertTrue("learning_iterations param must be nonnegative integer" in str(context.exception))
 
     def testParamLearningIterationsInvalidNumeric2(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(learningIterations=-2)
-        self.assertTrue("learningIterations param must be nonnegative integer" in str(context.exception))
+            clf = XCS(learning_iterations=-2)
+        self.assertTrue("learning_iterations param must be nonnegative integer" in str(context.exception))
 
     def testParamLearningIterations(self):
-        clf = XCS(learningIterations=2000)
-        self.assertEqual(clf.learningIterations,2000)
+        clf = XCS(learning_iterations=2000)
+        self.assertEqual(clf.learning_iterations,2000)
 
     #N (nonnegative integer)
     def testParamNNonnumeric(self):
@@ -387,43 +387,43 @@ class test_XCS(unittest.TestCase):
         clf = XCS(theta_matching=5)
         self.assertEqual(clf.theta_matching,5)
 
-    #doGASubsumption (boolean)
+    #do_GA_subsumption (boolean)
     def testDoSub2Invalid(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(doGASubsumption=2)
-        self.assertTrue("doGASubsumption param must be boolean" in str(context.exception))
+            clf = XCS(do_GA_subsumption=2)
+        self.assertTrue("do_GA_subsumption param must be boolean" in str(context.exception))
 
     def testDoSub2(self):
-        clf = XCS(doGASubsumption=True)
-        self.assertEqual(clf.doGASubsumption,True)
+        clf = XCS(do_GA_subsumption=True)
+        self.assertEqual(clf.do_GA_subsumption,True)
 
-    #doActionSetSubsumption (boolean)
+    #do_action_set_subsumption (boolean)
     def testDoSubInvalid(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(doActionSetSubsumption=2)
-        self.assertTrue("doActionSetSubsumption param must be boolean" in str(context.exception))
+            clf = XCS(do_action_set_subsumption=2)
+        self.assertTrue("do_action_set_subsumption param must be boolean" in str(context.exception))
 
     def testDoSub(self):
-        clf = XCS(doActionSetSubsumption=True)
-        self.assertEqual(clf.doActionSetSubsumption,True)
+        clf = XCS(do_action_set_subsumption=True)
+        self.assertEqual(clf.do_action_set_subsumption,True)
 
-    #maxPayoff (float)
+    #max_payoff (float)
     def testMaxPayoffInv1(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(maxPayoff="hi")
-        self.assertTrue("maxPayoff param must be float" in str(context.exception))
+            clf = XCS(max_payoff="hi")
+        self.assertTrue("max_payoff param must be float" in str(context.exception))
 
     def testMaxPayoff1(self):
-        clf = XCS(maxPayoff = -1)
-        self.assertEqual(clf.maxPayoff,-1)
+        clf = XCS(max_payoff = -1)
+        self.assertEqual(clf.max_payoff,-1)
 
     def testMaxPayoff2(self):
-        clf = XCS(maxPayoff = 3)
-        self.assertEqual(clf.maxPayoff,3)
+        clf = XCS(max_payoff = 3)
+        self.assertEqual(clf.max_payoff,3)
 
     def testMaxPayoff3(self):
-        clf = XCS(maxPayoff = 1.2)
-        self.assertEqual(clf.maxPayoff,1.2)
+        clf = XCS(max_payoff = 1.2)
+        self.assertEqual(clf.max_payoff,1.2)
 
     #theta_sub (nonnegative integer)
     def testParamThetaSubInv1(self):
@@ -482,204 +482,204 @@ class test_XCS(unittest.TestCase):
         clf = XCS(theta_select=1)
         self.assertEqual(clf.theta_select, 1)
 
-    #discreteAttributeLimit (nonnegative integer or 'c/d'
+    #discrete_attribute_limit (nonnegative integer or 'c/d'
     def testDiscreteAttributeLimitInv1(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(discreteAttributeLimit="h")
-        self.assertTrue("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'" in str(context.exception))
+            clf = XCS(discrete_attribute_limit="h")
+        self.assertTrue("discrete_attribute_limit param must be nonnegative integer or 'c' or 'd'" in str(context.exception))
 
     def testDiscreteAttributeLimitInv2(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(discreteAttributeLimit=-10)
-        self.assertTrue("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'" in str(context.exception))
+            clf = XCS(discrete_attribute_limit=-10)
+        self.assertTrue("discrete_attribute_limit param must be nonnegative integer or 'c' or 'd'" in str(context.exception))
 
     def testDiscreteAttributeLimitInv3(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(discreteAttributeLimit=1.2)
-        self.assertTrue("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'" in str(context.exception))
+            clf = XCS(discrete_attribute_limit=1.2)
+        self.assertTrue("discrete_attribute_limit param must be nonnegative integer or 'c' or 'd'" in str(context.exception))
 
     def testDiscreteAttributeLimit1(self):
-        clf = XCS(discreteAttributeLimit=10)
-        self.assertEqual(clf.discreteAttributeLimit,10)
+        clf = XCS(discrete_attribute_limit=10)
+        self.assertEqual(clf.discrete_attribute_limit,10)
 
     def testDiscreteAttributeLimit2(self):
-        clf = XCS(discreteAttributeLimit="c")
-        self.assertEqual(clf.discreteAttributeLimit,"c")
+        clf = XCS(discrete_attribute_limit="c")
+        self.assertEqual(clf.discrete_attribute_limit,"c")
 
     def testDiscreteAttributeLimit3(self):
-        clf = XCS(discreteAttributeLimit="d")
-        self.assertEqual(clf.discreteAttributeLimit,"d")
+        clf = XCS(discrete_attribute_limit="d")
+        self.assertEqual(clf.discrete_attribute_limit,"d")
 
-    #specifiedAttributes (ndarray of nonnegative integer attributes
+    #specified_attributes (ndarray of nonnegative integer attributes
     def testParamSpecAttrNonarray(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(specifiedAttributes=2)
-        self.assertTrue("specifiedAttributes param must be ndarray" in str(context.exception))
+            clf = XCS(specified_attributes=2)
+        self.assertTrue("specified_attributes param must be ndarray" in str(context.exception))
 
     def testParamSpecAttrNonnumeric(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(specifiedAttributes=np.array([2,100,"hi",200]))
-        self.assertTrue("All specifiedAttributes elements param must be nonnegative integers" in str(context.exception))
+            clf = XCS(specified_attributes=np.array([2,100,"hi",200]))
+        self.assertTrue("All specified_attributes elements param must be nonnegative integers" in str(context.exception))
 
     def testParamSpecAttrInvalidNumeric(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(specifiedAttributes=np.array([2,100,200.2,200]))
-        self.assertTrue("All specifiedAttributes elements param must be nonnegative integers" in str(context.exception))
+            clf = XCS(specified_attributes=np.array([2,100,200.2,200]))
+        self.assertTrue("All specified_attributes elements param must be nonnegative integers" in str(context.exception))
 
     def testParamSpecAttrInvalidNumeric2(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(specifiedAttributes=np.array([2,100,-200,200]))
-        self.assertTrue("All specifiedAttributes elements param must be nonnegative integers" in str(context.exception))
+            clf = XCS(specified_attributes=np.array([2,100,-200,200]))
+        self.assertTrue("All specified_attributes elements param must be nonnegative integers" in str(context.exception))
 
     def testParamSpecAttr(self):
-        clf = XCS(specifiedAttributes=np.array([2, 100, 200, 300]))
-        self.assertTrue(np.array_equal(clf.specifiedAttributes,np.array([2, 100, 200, 300])))
+        clf = XCS(specified_attributes=np.array([2, 100, 200, 300]))
+        self.assertTrue(np.array_equal(clf.specified_attributes,np.array([2, 100, 200, 300])))
 
-    #randomSeed (integer or "none")
+    #random_state (integer or "none")
     def testRandomSeedInv1(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(randomSeed="hello")
-        self.assertTrue("randomSeed param must be integer or 'none'" in str(context.exception))
+            clf = XCS(random_state="hello")
+        self.assertTrue("random_state param must be integer or None" in str(context.exception))
 
     def testRandomSeedInv2(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(randomSeed=1.2)
-        self.assertTrue("randomSeed param must be integer or 'none'" in str(context.exception))
+            clf = XCS(random_state=1.2)
+        self.assertTrue("random_state param must be integer or None" in str(context.exception))
 
     def testRandomSeed2(self):
-        clf = XCS(randomSeed=200)
-        self.assertEqual(clf.randomSeed,200)
+        clf = XCS(random_state=200)
+        self.assertEqual(clf.random_state,200)
 
     def testRandomSeed3(self):
-        clf = XCS(randomSeed='none')
-        self.assertEqual(clf.randomSeed,'none')
+        clf = XCS(random_state=None)
+        self.assertEqual(clf.random_state,None)
 
-    #predictionErrorReduction (float)
+    #prediction_error_reduction (float)
     def testPredReductionInv1(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(predictionErrorReduction="hi")
-        self.assertTrue("predictionErrorReduction param must be float" in str(context.exception))
+            clf = XCS(prediction_error_reduction="hi")
+        self.assertTrue("prediction_error_reduction param must be float" in str(context.exception))
 
     def testPredReduction1(self):
-        clf = XCS(predictionErrorReduction = -1)
-        self.assertEqual(clf.predictionErrorReduction,-1)
+        clf = XCS(prediction_error_reduction = -1)
+        self.assertEqual(clf.prediction_error_reduction,-1)
 
     def testPredReduction2(self):
-        clf = XCS(predictionErrorReduction = 3)
-        self.assertEqual(clf.predictionErrorReduction,3)
+        clf = XCS(prediction_error_reduction = 3)
+        self.assertEqual(clf.prediction_error_reduction,3)
 
     def testPredReduction3(self):
-        clf = XCS(predictionErrorReduction = 1.2)
-        self.assertEqual(clf.predictionErrorReduction,1.2)
+        clf = XCS(prediction_error_reduction = 1.2)
+        self.assertEqual(clf.prediction_error_reduction,1.2)
 
-    #fitnessReduction (float)
+    #fitness_reduction (float)
     def testFitnessReductionInv1(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(fitnessReduction="hi")
-        self.assertTrue("fitnessReduction param must be float" in str(context.exception))
+            clf = XCS(fitness_reduction="hi")
+        self.assertTrue("fitness_reduction param must be float" in str(context.exception))
 
     def testFitnessReduction1(self):
-        clf = XCS(fitnessReduction = -1)
-        self.assertEqual(clf.fitnessReduction,-1)
+        clf = XCS(fitness_reduction = -1)
+        self.assertEqual(clf.fitness_reduction,-1)
 
     def testFitnessReduction2(self):
-        clf = XCS(fitnessReduction = 3)
-        self.assertEqual(clf.fitnessReduction,3)
+        clf = XCS(fitness_reduction = 3)
+        self.assertEqual(clf.fitness_reduction,3)
 
     def testFitnessReduction3(self):
-        clf = XCS(fitnessReduction = 1.2)
-        self.assertEqual(clf.fitnessReduction,1.2)
+        clf = XCS(fitness_reduction = 1.2)
+        self.assertEqual(clf.fitness_reduction,1.2)
 
-    #rebootFilename (None or String)
+    #reboot_filename (None or String)
     def testRebootFilenameInv1(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(rebootFilename=2)
-        self.assertTrue("rebootFilename param must be None or String from pickle" in str(context.exception))
+            clf = XCS(reboot_filename=2)
+        self.assertTrue("reboot_filename param must be None or String from pickle" in str(context.exception))
 
     def testRebootFilenameInv2(self):
         with self.assertRaises(Exception) as context:
-            clf = XCS(rebootFilename=True)
-        self.assertTrue("rebootFilename param must be None or String from pickle" in str(context.exception))
+            clf = XCS(reboot_filename=True)
+        self.assertTrue("reboot_filename param must be None or String from pickle" in str(context.exception))
 
     def testRebootFilename1(self):
         clf = XCS()
-        self.assertEqual(clf.rebootFilename,None)
+        self.assertEqual(clf.reboot_filename,None)
 
     def testRebootFilename2(self):
-        clf = XCS(rebootFilename=None)
-        self.assertEqual(clf.rebootFilename,None)
+        clf = XCS(reboot_filename=None)
+        self.assertEqual(clf.reboot_filename,None)
 
     def testRebootFilename3(self):
-        clf = XCS(rebootFilename='hello')
-        self.assertEqual(clf.rebootFilename,'hello')
+        clf = XCS(reboot_filename='hello')
+        self.assertEqual(clf.reboot_filename,'hello')
 
     #Performance Tests
     #6B MP 1000 iter training
     def test6BitMP1000Iterations(self):
         dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer6Modified.csv")
         converter = StringEnumerator(dataPath,"Class")
-        headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
-        clf = XCS(learningIterations=1000,N=500,nu=10)
+        headers, classLabel, dataFeatures, dataPhenotypes = converter.get_params()
+        clf = XCS(learning_iterations=1000,N=500,nu=10)
         clf.fit(dataFeatures,dataPhenotypes)
         answer = 0.894
-        #print("6 Bit 1000 Iter: "+str(clf.getFinalTrainingAccuracy()))
-        self.assertTrue(self.approxEqualOrBetter(0.2,clf.getFinalTrainingAccuracy(),answer,True))
+        #print("6 Bit 1000 Iter: "+str(clf.get_final_training_accuracy()))
+        self.assertTrue(self.approxEqualOrBetter(0.2,clf.get_final_training_accuracy(),answer,True))
 
     # 6B MP 5000 iter training
     def test6BitMP5000Iterations(self):
         dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer6Modified.csv")
         converter = StringEnumerator(dataPath, "Class")
-        headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
-        clf = XCS(learningIterations=5000, N=500, nu=10)
+        headers, classLabel, dataFeatures, dataPhenotypes = converter.get_params()
+        clf = XCS(learning_iterations=5000, N=500, nu=10)
         clf.fit(dataFeatures, dataPhenotypes)
         answer = 1
-        #print("6 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
-        self.assertTrue(self.approxEqualOrBetter(0.2, clf.getFinalTrainingAccuracy(), answer, True))
+        #print("6 Bit 5000 Iter: "+str(clf.get_final_training_accuracy()))
+        self.assertTrue(self.approxEqualOrBetter(0.2, clf.get_final_training_accuracy(), answer, True))
 
     #11B MP 5000 iter training
     def test11BitMP5000Iterations(self):
         dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer11Modified.csv")
         converter = StringEnumerator(dataPath,"Class")
-        headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
-        clf = XCS(learningIterations=5000,N=1000,nu=10)
+        headers, classLabel, dataFeatures, dataPhenotypes = converter.get_params()
+        clf = XCS(learning_iterations=5000,N=1000,nu=10)
         clf.fit(dataFeatures,dataPhenotypes)
         answer = 0.9514
-        #print("11 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
-        self.assertTrue(self.approxEqualOrBetter(0.2,clf.getFinalTrainingAccuracy(),answer,True))
+        #print("11 Bit 5000 Iter: "+str(clf.get_final_training_accuracy()))
+        self.assertTrue(self.approxEqualOrBetter(0.2,clf.get_final_training_accuracy(),answer,True))
 
     #20B MP 5000 iter training
     def test20BitMP5000Iterations(self):
         dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer20Modified.csv")
         converter = StringEnumerator(dataPath,"Class")
-        headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
-        clf = XCS(learningIterations=5000,N=2000,nu=10)
+        headers, classLabel, dataFeatures, dataPhenotypes = converter.get_params()
+        clf = XCS(learning_iterations=5000,N=2000,nu=10)
         clf.fit(dataFeatures,dataPhenotypes)
         answer = 0.6634
-        #print("20 Bit 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
-        self.assertTrue(self.approxEqualOrBetter(0.2,clf.getFinalTrainingAccuracy(),answer,True))
+        #print("20 Bit 5000 Iter: "+str(clf.get_final_training_accuracy()))
+        self.assertTrue(self.approxEqualOrBetter(0.2,clf.get_final_training_accuracy(),answer,True))
 
     #Continuous Valued 5000 iter training
     def testContValues5000Iterations(self):
         dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/ContinuousAndNonBinaryDiscreteAttributes.csv")
         converter = StringEnumerator(dataPath,"Class")
-        headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
-        clf = XCS(learningIterations=5000)
+        headers, classLabel, dataFeatures, dataPhenotypes = converter.get_params()
+        clf = XCS(learning_iterations=5000)
         clf.fit(dataFeatures,dataPhenotypes)
         answer = 0.64
-        #print("Continuous Attributes 5000 Iter: "+str(clf.getFinalTrainingAccuracy()))
-        self.assertTrue(self.approxEqualOrBetter(0.2,clf.getFinalTrainingAccuracy(),answer,True))
+        #print("Continuous Attributes 5000 Iter: "+str(clf.get_final_training_accuracy()))
+        self.assertTrue(self.approxEqualOrBetter(0.2,clf.get_final_training_accuracy(),answer,True))
 
     #3-fold testing 6B MP 1000 iter
     def test6BitMPTesting1000Iterations(self):
         dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/Multiplexer6Modified.csv")
         converter = StringEnumerator(dataPath,"Class")
-        headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
+        headers, classLabel, dataFeatures, dataPhenotypes = converter.get_params()
         formatted = np.insert(dataFeatures, dataFeatures.shape[1], dataPhenotypes, 1)
         np.random.shuffle(formatted)
         dataFeatures = np.delete(formatted, -1, axis=1)
         dataPhenotypes = formatted[:, -1]
 
-        clf = XCS(learningIterations=1000,N=500,nu=10)
+        clf = XCS(learning_iterations=1000,N=500,nu=10)
         score = np.mean(cross_val_score(clf, dataFeatures, dataPhenotypes, cv=3))
 
         answer = 0.9
@@ -690,13 +690,13 @@ class test_XCS(unittest.TestCase):
     def testContValuesAndMissingTesting5000Iterations(self):
         dataPath = os.path.join(THIS_DIR, "test/DataSets/Real/ContinuousAndNonBinaryDiscreteAttributesMissing.csv")
         converter = StringEnumerator(dataPath, "Class")
-        headers, classLabel, dataFeatures, dataPhenotypes = converter.getParams()
+        headers, classLabel, dataFeatures, dataPhenotypes = converter.get_params()
         formatted = np.insert(dataFeatures, dataFeatures.shape[1], dataPhenotypes, 1)
         np.random.shuffle(formatted)
         dataFeatures = np.delete(formatted, -1, axis=1)
         dataPhenotypes = formatted[:, -1]
 
-        clf = XCS(learningIterations=5000)
+        clf = XCS(learning_iterations=5000)
         score = np.mean(cross_val_score(clf, dataFeatures, dataPhenotypes, cv=3))
 
         answer = 0.5

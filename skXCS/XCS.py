@@ -15,13 +15,13 @@ import pickle
 import time
 
 class XCS(BaseEstimator,ClassifierMixin):
-    def __init__(self,learningIterations=10000,N=1000,p_general=0.5,beta=0.2,alpha=0.1,e_0=10,nu=5,theta_GA=25,p_crossover=0.8,p_mutation=0.04,
-                 theta_del=20,delta=0.1,init_prediction=10,init_e=0,init_fitness=0.01,p_explore=0.5,theta_matching=None,doGASubsumption=True,
-                 doActionSetSubsumption=False,maxPayoff=1000,theta_sub=20,theta_select=0.5,discreteAttributeLimit=10,specifiedAttributes=np.array([]),
-                 randomSeed="none",predictionErrorReduction=0.25,fitnessReduction=0.1,rebootFilename=None):
+    def __init__(self,learning_iterations=10000,N=1000,p_general=0.5,beta=0.2,alpha=0.1,e_0=10,nu=5,theta_GA=25,p_crossover=0.8,p_mutation=0.04,
+                 theta_del=20,delta=0.1,init_prediction=10,init_e=0,init_fitness=0.01,p_explore=0.5,theta_matching=None,do_GA_subsumption=True,
+                 do_action_set_subsumption=False,max_payoff=1000,theta_sub=20,theta_select=0.5,discrete_attribute_limit=10,specified_attributes=np.array([]),
+                 random_state=None,prediction_error_reduction=0.25,fitness_reduction=0.1,reboot_filename=None):
 
                 '''
-                :param learningIterations:          Must be nonnegative integer. The number of explore or exploit learning iterations to run
+                :param learning_iterations:          Must be nonnegative integer. The number of explore or exploit learning iterations to run
                 :param N:                           Must be nonnegative integer. Maximum micropopulation size
                 :param p_general:                   Must be float from 0 - 1. Probability of generalizing an allele during covering
                 :param beta:                        Must be float. Learning Rate for updating statistics
@@ -38,30 +38,30 @@ class XCS(BaseEstimator,ClassifierMixin):
                 :param init_fitness:                Must be float. The initial prediction value when generating a new classifier (e.g in covering)
                 :param p_explore:                   Must be float from 0 - 1. Probability of doing an explore cycle instead of an exploit cycle
                 :param theta_matching:              Must be nonnegative integer. Number of unique actions that must be represented in the match set (otherwise, covering)
-                :param doGASubsumption:             Must be boolean. Do subsumption in GA
-                :param doActionSetSubsumption:      Must be boolean. Do subsumption in [A]
-                :param maxPayoff:                   Must be float. For single step problems, what the maximum reward for correctness
+                :param do_GA_subsumption:             Must be boolean. Do subsumption in GA
+                :param do_action_set_subsumption:      Must be boolean. Do subsumption in [A]
+                :param max_payoff:                   Must be float. For single step problems, what the maximum reward for correctness
                 :param theta_sub:                   Must be nonnegative integer. The experience of a classifier required to be a subsumer
                 :param theta_select:                Must be float from 0 - 1. The fraction of the action set to be included in tournament selection
-                :param discreteAttributeLimit:      Must be nonnegative integer OR "c" OR "d". Multipurpose param. If it is a nonnegative integer, discreteAttributeLimit determines the threshold that determines
-                                                    if an attribute will be treated as a continuous or discrete attribute. For example, if discreteAttributeLimit == 10, if an attribute has more than 10 unique
+                :param discrete_attribute_limit:      Must be nonnegative integer OR "c" OR "d". Multipurpose param. If it is a nonnegative integer, discrete_attribute_limit determines the threshold that determines
+                                                    if an attribute will be treated as a continuous or discrete attribute. For example, if discrete_attribute_limit == 10, if an attribute has more than 10 unique
                                                     values in the dataset, the attribute will be continuous. If the attribute has 10 or less unique values, it will be discrete. Alternatively,
-                                                    discreteAttributeLimit can take the value of "c" or "d". See next param for this
-                :param specifiedAttributes:         Must be an ndarray type of nonnegative integer attributeIndices (zero indexed).
+                                                    discrete_attribute_limit can take the value of "c" or "d". See next param for this
+                :param specified_attributes:         Must be an ndarray type of nonnegative integer attributeIndices (zero indexed).
                                                     If "c", attributes specified by index in this param will be continuous and the rest will be discrete. If "d", attributes specified by index in this
                                                     param will be discrete and the rest will be continuous.
-                :param randomSeed:                  Must be an integer or "none". Set a constant random seed value to some integer (in order to obtain reproducible results). Put 'none' if none (for pseudo-random algorithm runs)
-                :param predictionErrorReduction:    Must be float. The reduction of the prediction error when generating an offspring classifier
-                :param fitnessReduction:            Must be float. The reduction of the fitness when generating an offspring classifier
-                :param rebootFilename:    Must be String or None. Filename of model to be rebooted
+                :param random_state:                  Must be an integer or None. Set a constant random seed value to some integer (in order to obtain reproducible results). Put None if none (for pseudo-random algorithm runs)
+                :param prediction_error_reduction:    Must be float. The reduction of the prediction error when generating an offspring classifier
+                :param fitness_reduction:            Must be float. The reduction of the fitness when generating an offspring classifier
+                :param reboot_filename:    Must be String or None. Filename of model to be rebooted
                 '''
 
-                #learningIterations
-                if not self.checkIsInt(learningIterations):
-                    raise Exception("learningIterations param must be nonnegative integer")
+                #learning_iterations
+                if not self.checkIsInt(learning_iterations):
+                    raise Exception("learning_iterations param must be nonnegative integer")
 
-                if learningIterations < 0:
-                    raise Exception("learningIterations param must be nonnegative integer")
+                if learning_iterations < 0:
+                    raise Exception("learning_iterations param must be nonnegative integer")
 
                 #N
                 if not self.checkIsInt(N):
@@ -151,17 +151,17 @@ class XCS(BaseEstimator,ClassifierMixin):
                 if theta_matching != None and theta_matching < 0:
                     raise Exception("theta_matching param must be nonnegative integer")
 
-                #doGASubsumption
-                if not (isinstance(doGASubsumption, bool)):
-                    raise Exception("doGASubsumption param must be boolean")
+                #do_GA_subsumption
+                if not (isinstance(do_GA_subsumption, bool)):
+                    raise Exception("do_GA_subsumption param must be boolean")
 
-                #doActionSetSubsumption
-                if not (isinstance(doActionSetSubsumption, bool)):
-                    raise Exception("doActionSetSubsumption param must be boolean")
+                #do_action_set_subsumption
+                if not (isinstance(do_action_set_subsumption, bool)):
+                    raise Exception("do_action_set_subsumption param must be boolean")
 
-                #maxPayoff
-                if not self.checkIsFloat(maxPayoff):
-                    raise Exception("maxPayoff param must be float")
+                #max_payoff
+                if not self.checkIsFloat(max_payoff):
+                    raise Exception("max_payoff param must be float")
 
                 #theta_sub
                 if not self.checkIsInt(theta_sub):
@@ -177,50 +177,50 @@ class XCS(BaseEstimator,ClassifierMixin):
                 if theta_select < 0 or theta_select > 1:
                     raise Exception("theta_select param must be float from 0 - 1")
 
-                #discreteAttributeLimit
-                if discreteAttributeLimit != "c" and discreteAttributeLimit != "d":
+                #discrete_attribute_limit
+                if discrete_attribute_limit != "c" and discrete_attribute_limit != "d":
                     try:
-                        dpl = int(discreteAttributeLimit)
-                        if not self.checkIsInt(discreteAttributeLimit):
-                            raise Exception("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'")
+                        dpl = int(discrete_attribute_limit)
+                        if not self.checkIsInt(discrete_attribute_limit):
+                            raise Exception("discrete_attribute_limit param must be nonnegative integer or 'c' or 'd'")
                         if dpl < 0:
-                            raise Exception("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'")
+                            raise Exception("discrete_attribute_limit param must be nonnegative integer or 'c' or 'd'")
                     except:
-                        raise Exception("discreteAttributeLimit param must be nonnegative integer or 'c' or 'd'")
+                        raise Exception("discrete_attribute_limit param must be nonnegative integer or 'c' or 'd'")
 
-                #specifiedAttributes
-                if not (isinstance(specifiedAttributes, np.ndarray)):
-                    raise Exception("specifiedAttributes param must be ndarray")
+                #specified_attributes
+                if not (isinstance(specified_attributes, np.ndarray)):
+                    raise Exception("specified_attributes param must be ndarray")
 
-                for spAttr in specifiedAttributes:
+                for spAttr in specified_attributes:
                     if not self.checkIsInt(spAttr):
-                        raise Exception("All specifiedAttributes elements param must be nonnegative integers")
+                        raise Exception("All specified_attributes elements param must be nonnegative integers")
                     if int(spAttr) < 0:
-                        raise Exception("All specifiedAttributes elements param must be nonnegative integers")
+                        raise Exception("All specified_attributes elements param must be nonnegative integers")
 
-                #predictionErrorReduction
-                if not self.checkIsFloat(predictionErrorReduction):
-                    raise Exception("predictionErrorReduction param must be float")
+                #prediction_error_reduction
+                if not self.checkIsFloat(prediction_error_reduction):
+                    raise Exception("prediction_error_reduction param must be float")
 
-                #fitnessReduction
-                if not self.checkIsFloat(fitnessReduction):
-                    raise Exception("fitnessReduction param must be float")
+                #fitness_reduction
+                if not self.checkIsFloat(fitness_reduction):
+                    raise Exception("fitness_reduction param must be float")
 
                 #rebootPopulationFilename
-                if rebootFilename != None and not isinstance(rebootFilename,str):
-                    raise Exception("rebootFilename param must be None or String from pickle")
+                if reboot_filename != None and not isinstance(reboot_filename,str):
+                    raise Exception("reboot_filename param must be None or String from pickle")
 
-                # randomSeed
-                if randomSeed != "none":
+                # random_state
+                if random_state != None:
                     try:
-                        if not self.checkIsInt(randomSeed):
-                            raise Exception("randomSeed param must be integer or 'none'")
-                        random.seed(int(randomSeed))
-                        np.random.seed(int(randomSeed))
+                        if not self.checkIsInt(random_state):
+                            raise Exception("random_state param must be integer or None")
+                        random.seed(int(random_state))
+                        np.random.seed(int(random_state))
                     except:
-                        raise Exception("randomSeed param must be integer or 'none'")
+                        raise Exception("random_state param must be integer or None")
 
-                self.learningIterations = learningIterations
+                self.learning_iterations = learning_iterations
                 self.N = N
                 self.p_general = p_general
                 self.beta = beta
@@ -237,21 +237,21 @@ class XCS(BaseEstimator,ClassifierMixin):
                 self.init_fitness = init_fitness
                 self.p_explore = p_explore
                 self.theta_matching = theta_matching
-                self.doGASubsumption = doGASubsumption
-                self.doActionSetSubsumption = doActionSetSubsumption
-                self.maxPayoff = maxPayoff
+                self.do_GA_subsumption = do_GA_subsumption
+                self.do_action_set_subsumption = do_action_set_subsumption
+                self.max_payoff = max_payoff
                 self.theta_sub = theta_sub
                 self.theta_select = theta_select
-                self.discreteAttributeLimit = discreteAttributeLimit
-                self.specifiedAttributes = specifiedAttributes
-                self.randomSeed = randomSeed
-                self.predictionErrorReduction = predictionErrorReduction
-                self.fitnessReduction = fitnessReduction
+                self.discrete_attribute_limit = discrete_attribute_limit
+                self.specified_attributes = specified_attributes
+                self.random_state = random_state
+                self.prediction_error_reduction = prediction_error_reduction
+                self.fitness_reduction = fitness_reduction
 
                 self.hasTrained = False
-                self.trackingObj = tempTrackingObj()
+                self.trackingObj = TempTrackingObj()
                 self.record = IterationRecord()
-                self.rebootFilename = rebootFilename
+                self.reboot_filename = reboot_filename
 
     def checkIsInt(self, num):
         try:
@@ -306,15 +306,15 @@ class XCS(BaseEstimator,ClassifierMixin):
         self.trackedAccuracy = []
         self.movingAvgCount = 50
         aveGenerality = 0
-        aveGeneralityFreq = min(self.env.formatData.numTrainInstances,int(self.learningIterations/20)+1)
+        aveGeneralityFreq = min(self.env.formatData.numTrainInstances,int(self.learning_iterations/20)+1)
 
-        if self.rebootFilename == None:
+        if self.reboot_filename == None:
             self.timer = Timer()
             self.population = ClassifierSet()
         else:
             self.rebootPopulation()
 
-        while self.iterationCount < self.learningIterations:
+        while self.iterationCount < self.learning_iterations:
             state = self.env.getTrainState()
             self.runIteration(state)
 
@@ -367,7 +367,7 @@ class XCS(BaseEstimator,ClassifierMixin):
             self.population.updateActionSet(reward, self)
             self.population.deletion(self)
 
-            if reward == self.maxPayoff:
+            if reward == self.max_payoff:
                 if len(self.trackedAccuracy) == self.movingAvgCount:
                     del self.trackedAccuracy[0]
                 self.trackedAccuracy.append(1)
@@ -385,11 +385,11 @@ class XCS(BaseEstimator,ClassifierMixin):
 
     ##*************** Population Reboot ****************
     def saveFinalMetrics(self):
-        self.finalMetrics = [self.learningIterations,self.timer.globalTime, self.timer.globalMatching,
+        self.finalMetrics = [self.learning_iterations,self.timer.globalTime, self.timer.globalMatching,
                              self.timer.globalDeletion, self.timer.globalSubsumption, self.timer.globalGA,
                              self.timer.globalEvaluation,copy.deepcopy(self.population.popSet)]
 
-    def pickleModel(self,filename=None):
+    def pickle_model(self,filename=None):
         if self.hasTrained:
             if filename == None:
                 filename = 'pickled'+str(int(time.time()))
@@ -401,7 +401,7 @@ class XCS(BaseEstimator,ClassifierMixin):
 
     def rebootPopulation(self):
         #Sets popSet and microPopSize of self.population, as well as trackingMetrics,
-        file = open(self.rebootFilename,'rb')
+        file = open(self.reboot_filename,'rb')
         rawData = pickle.load(file)
         file.close()
 
@@ -420,7 +420,7 @@ class XCS(BaseEstimator,ClassifierMixin):
         self.timer.globalSubsumption = rawData[4]
         self.timer.globalGA = rawData[5]
         self.timer.globalEvaluation = rawData[6]
-        self.learningIterations += rawData[0]
+        self.learning_iterations += rawData[0]
         self.iterationCount += rawData[0]
 
     ##*************** Predict and Score ****************
@@ -481,13 +481,13 @@ class XCS(BaseEstimator,ClassifierMixin):
         return balanced_accuracy_score(y,predictionList)
 
     ##*************** Export and Evaluation ****************
-    def exportIterationTrackingData(self,filename='iterationData.csv'):
+    def export_iteration_tracking_data(self,filename='iterationData.csv'):
         if self.hasTrained:
             self.record.exportTrackingToCSV(filename)
         else:
             raise Exception("There is no tracking data to export, as the XCS model has not been trained")
 
-    def exportFinalRulePopulation(self,filename='rulePopulation.csv',headerNames=np.array([]),className="Action"):
+    def export_final_rule_population(self,filename='rulePopulation.csv',headerNames=np.array([]),className="Action"):
         if self.hasTrained:
             numAttributes = self.env.formatData.numAttributes
             headerNames = headerNames.tolist()  # Convert to Python List
@@ -540,7 +540,7 @@ class XCS(BaseEstimator,ClassifierMixin):
         else:
             raise Exception("There is no rule population to export, as the XCS model has not been trained")
 
-    def exportFinalRulePopulationDCAL(self,filename='rulePopulationDCAL.csv',headerNames=np.array([]),className="Action"):
+    def export_final_rule_population_DCAL(self,filename='rulePopulationDCAL.csv',headerNames=np.array([]),className="Action"):
         if self.hasTrained:
             numAttributes = self.env.formatData.numAttributes
 
@@ -606,14 +606,14 @@ class XCS(BaseEstimator,ClassifierMixin):
         else:
             raise Exception("There is no rule population to export, as the XCS model has not been trained")
 
-    def getFinalTrainingAccuracy(self):
+    def get_final_training_accuracy(self):
         if self.hasTrained:
             originalTrainingData = self.env.formatData.savedRawTrainingData
             return self.score(originalTrainingData[0],originalTrainingData[1])
         else:
             raise Exception("There is no final training accuracy to return, as the XCS model has not been trained")
 
-    def getFinalInstanceCoverage(self):
+    def get_final_instance_coverage(self):
         if self.hasTrained:
             numCovered = 0
             originalTrainingData = self.env.formatData.savedRawTrainingData
@@ -627,19 +627,19 @@ class XCS(BaseEstimator,ClassifierMixin):
         else:
             raise Exception("There is no final instance coverage to return, as the XCS model has not been trained")
 
-    def getFinalAttributeSpecificityList(self):
+    def get_final_attribute_specificity_list(self):
         if self.hasTrained:
             return self.population.getAttributeSpecificityList(self)
         else:
             raise Exception("There is no final attribute specificity list to return, as the XCS model has not been trained")
 
-    def getFinalAttributeAccuracyList(self):
+    def get_final_attribute_accuracy_list(self):
         if self.hasTrained:
             return self.population.getAttributeAccuracyList(self)
         else:
             raise Exception("There is no final attribute accuracy list to return, as the XCS model has not been trained")
 
-class tempTrackingObj():
+class TempTrackingObj():
     #Tracks stats of every iteration (except accuracy, avg generality, and times)
     def __init__(self):
         self.macroPopSize = 0

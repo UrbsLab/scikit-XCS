@@ -89,9 +89,9 @@ class ClassifierSet:
             classifier.updateActionSetSize(actionSetNumerositySum,xcs)
 
         self.updateFitnessSet(xcs)
-        if xcs.doActionSetSubsumption:
+        if xcs.do_action_set_subsumption:
             xcs.timer.startTimeSubsumption()
-            self.doActionSetSubsumption(xcs)
+            self.do_action_set_subsumption(xcs)
             xcs.timer.stopTimeSubsumption()
 
     def updateFitnessSet(self,xcs):
@@ -112,7 +112,7 @@ class ClassifierSet:
             i+=1
 
     ####Action Set Subsumption####
-    def doActionSetSubsumption(self,xcs):
+    def do_action_set_subsumption(self,xcs):
         subsumer = None
         for clRef in self.actionSet:
             classifier = self.popSet[clRef]
@@ -177,14 +177,14 @@ class ClassifierSet:
 
         if changedByCrossover:
             childClassifier1.prediction = (childClassifier1.prediction + childClassifier2.prediction)/2
-            childClassifier2.predictionError = xcs.predictionErrorReduction*(childClassifier1.predictionError + childClassifier2.predictionError)/2
-            childClassifier1.fitness = xcs.fitnessReduction*(childClassifier1.fitness+childClassifier2.fitness)/2
+            childClassifier2.predictionError = xcs.prediction_error_reduction*(childClassifier1.predictionError + childClassifier2.predictionError)/2
+            childClassifier1.fitness = xcs.fitness_reduction*(childClassifier1.fitness+childClassifier2.fitness)/2
             childClassifier2.prediction = childClassifier1.prediction
             childClassifier2.predictionError = childClassifier1.predictionError
             childClassifier2.fitness = childClassifier1.fitness
         else:
-            childClassifier1.fitness = xcs.fitnessReduction * childClassifier1.fitness
-            childClassifier2.fitness = xcs.fitnessReduction * childClassifier2.fitness
+            childClassifier1.fitness = xcs.fitness_reduction * childClassifier1.fitness
+            childClassifier2.fitness = xcs.fitness_reduction * childClassifier2.fitness
 
         changedByMutation1 = childClassifier1.mutation(state,xcs)
         changedByMutation2 = childClassifier2.mutation(state,xcs)
@@ -198,7 +198,7 @@ class ClassifierSet:
             self.insertDiscoveredClassifiers(childClassifier1,childClassifier2,parentClassifier1,parentClassifier2,xcs)
 
     def insertDiscoveredClassifiers(self,child1,child2,parent1,parent2,xcs):
-        if xcs.doGASubsumption:
+        if xcs.do_GA_subsumption:
             xcs.timer.startTimeSubsumption()
             self.subsumeClassifier(child1,parent1,parent2,xcs)
             self.subsumeClassifier(child2,parent1,parent2,xcs)

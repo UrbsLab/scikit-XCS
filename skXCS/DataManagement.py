@@ -15,7 +15,7 @@ class DataManagement:
 
         self.isDefault = True  # Is discrete attribute limit an int or string
         try:
-            int(xcs.discreteAttributeLimit)
+            int(xcs.discrete_attribute_limit)
         except:
             self.isDefault = False
 
@@ -46,7 +46,7 @@ class DataManagement:
             if self.isDefault:
                 currentInstanceIndex = 0
                 stateDict = {}
-                while attIsDiscrete and len(list(stateDict.keys())) <= xcs.discreteAttributeLimit and currentInstanceIndex < self.numTrainInstances:
+                while attIsDiscrete and len(list(stateDict.keys())) <= xcs.discrete_attribute_limit and currentInstanceIndex < self.numTrainInstances:
                     target = features[currentInstanceIndex,att]
                     if target in list(stateDict.keys()):
                         stateDict[target] += 1
@@ -56,15 +56,15 @@ class DataManagement:
                         stateDict[target] = 1
                     currentInstanceIndex+=1
 
-                if len(list(stateDict.keys())) > xcs.discreteAttributeLimit:
+                if len(list(stateDict.keys())) > xcs.discrete_attribute_limit:
                     attIsDiscrete = False
-            elif xcs.discreteAttributeLimit == "c":
-                if att in xcs.specifiedAttributes:
+            elif xcs.discrete_attribute_limit == "c":
+                if att in xcs.specified_attributes:
                     attIsDiscrete = False
                 else:
                     attIsDiscrete = True
-            elif xcs.discreteAttributeLimit == "d":
-                if att in xcs.specifiedAttributes:
+            elif xcs.discrete_attribute_limit == "d":
+                if att in xcs.specified_attributes:
                     attIsDiscrete = True
                 else:
                     attIsDiscrete = False
