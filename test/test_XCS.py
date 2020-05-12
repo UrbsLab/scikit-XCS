@@ -609,10 +609,6 @@ class test_XCS(unittest.TestCase):
         clf = XCS(reboot_filename=None)
         self.assertEqual(clf.reboot_filename,None)
 
-    def testRebootFilename3(self):
-        clf = XCS(reboot_filename='hello')
-        self.assertEqual(clf.reboot_filename,'hello')
-
     #Performance Tests
     #6B MP 1000 iter training
     def test6BitMP1000Iterations(self):
