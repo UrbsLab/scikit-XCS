@@ -16,12 +16,10 @@ class ClassifierSet:
         actionsNotCovered = copy.deepcopy(xcs.env.formatData.phenotypeList)
         totalNumActions = len(xcs.env.formatData.phenotypeList)
 
-        matchSetSize = 0
         for i in range(len(self.popSet)):
             classifier = self.popSet[i]
             if classifier.match(state,xcs):
                 self.matchSet.append(i)
-                matchSetSize+=classifier.numerosity
                 if classifier.action in actionsNotCovered:
                     actionsNotCovered.remove(classifier.action)
 
@@ -36,7 +34,7 @@ class ClassifierSet:
             else:
                 action = random.choice(copy.deepcopy(xcs.env.formatData.phenotypeList))
             coveredClassifier = Classifier(xcs)
-            coveredClassifier.initializeWithMatchingStateAndGivenAction(matchSetSize,state,action,xcs)
+            coveredClassifier.initializeWithMatchingStateAndGivenAction(1,state,action,xcs)
             self.addClassifierToPopulation(xcs,coveredClassifier,True)
             self.matchSet.append(len(self.popSet)-1)
             if len(actionsNotCovered) != 0:
