@@ -62,7 +62,8 @@ class PredictionArray:
         for action,value in self.predictionArray.items():
             if value == highVal:
                 bestIndexList.append(action)
-        return random.choice(bestIndexList)
+        #return random.choice(bestIndexList)
+        return bestIndexList[0]
 
     ##*************** Get ActionProbabilities ****************
     def getProbabilities(self):
