@@ -293,10 +293,7 @@ class ClassifierSet:
         return
 
     def getFitnessSum(self):
-        sum = 0
-        for classifier in self.popSet:
-            sum += classifier.fitness
-        return sum
+        return sum(classifier.fitness for classifier in self.popSet)
 
     ####Clear Sets####
     def clearSets(self):
