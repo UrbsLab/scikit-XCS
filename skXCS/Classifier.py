@@ -20,8 +20,6 @@ class Classifier:
         self.initTimeStamp = xcs.iterationCount
         self.deletionProb = None
 
-        pass
-
     def initializeWithParentClassifier(self,classifier):
         self.specifiedAttList = copy.deepcopy(classifier.specifiedAttList)
         self.condition = copy.deepcopy(classifier.condition)
@@ -49,8 +47,6 @@ class Classifier:
             else:
                 if instanceValue == self.condition[i]:
                     pass
-                elif instanceValue == None:
-                    return False
                 else:
                     return False
         return True
@@ -176,9 +172,7 @@ class Classifier:
         p_cl_specifiedAttList = copy.deepcopy(classifier.specifiedAttList)
 
         # Make list of attribute references appearing in at least one of the parents.-----------------------------
-        comboAttList = []
-        for i in p_self_specifiedAttList:
-            comboAttList.append(i)
+        comboAttList = [i for i in p_self_specifiedAttList]
         for i in p_cl_specifiedAttList:
             if i not in comboAttList:
                 comboAttList.append(i)
@@ -235,12 +229,10 @@ class Classifier:
                         if tempKey == 2:
                             self.condition[i_cl1] = [newMin, newMax]
                             classifier.condition.pop(i_cl2)
-
                             classifier.specifiedAttList.remove(attRef)
                         else:
                             classifier.condition[i_cl2] = [newMin, newMax]
                             self.condition.pop(i_cl1)
-
                             self.specifiedAttList.remove(attRef)
 
                 # Discrete Attribute
@@ -311,9 +303,8 @@ class Classifier:
         return changed
 
     def getDelProp(self,meanFitness,xcs):
-        if self.fitness / self.numerosity >= xcs.delta * meanFitness or self.experience < xcs.theta_del:
+        if self.experience < xcs.theta_del or self.fitness / self.numerosity >= xcs.delta * meanFitness:
             deletionVote = self.actionSetSize * self.numerosity
-
         elif self.fitness == 0.0:
             deletionVote = self.actionSetSize * self.numerosity * meanFitness / (xcs.init_fit / self.numerosity)
         else:
