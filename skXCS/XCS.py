@@ -21,7 +21,7 @@ class XCS(BaseEstimator,ClassifierMixin):
                  random_state=None,prediction_error_reduction=0.25,fitness_reduction=0.1,reboot_filename=None):
 
             '''
-            :param learning_iterations:          Must be nonnegative integer. The number of explore or exploit learning iterations to run
+            :param learning_iterations:         Must be nonnegative integer. The number of explore or exploit learning iterations to run
             :param N:                           Must be nonnegative integer. Maximum micropopulation size
             :param p_general:                   Must be float from 0 - 1. Probability of generalizing an allele during covering
             :param beta:                        Must be float. Learning Rate for updating statistics
@@ -38,22 +38,22 @@ class XCS(BaseEstimator,ClassifierMixin):
             :param init_fitness:                Must be float. The initial prediction value when generating a new classifier (e.g in covering)
             :param p_explore:                   Must be float from 0 - 1. Probability of doing an explore cycle instead of an exploit cycle
             :param theta_matching:              Must be nonnegative integer. Number of unique actions that must be represented in the match set (otherwise, covering)
-            :param do_GA_subsumption:             Must be boolean. Do subsumption in GA
-            :param do_action_set_subsumption:      Must be boolean. Do subsumption in [A]
-            :param max_payoff:                   Must be float. For single step problems, what the maximum reward for correctness
+            :param do_GA_subsumption:           Must be boolean. Do subsumption in GA
+            :param do_action_set_subsumption:   Must be boolean. Do subsumption in [A]
+            :param max_payoff:                  Must be float. For single step problems, what the maximum reward for correctness
             :param theta_sub:                   Must be nonnegative integer. The experience of a classifier required to be a subsumer
             :param theta_select:                Must be float from 0 - 1. The fraction of the action set to be included in tournament selection
-            :param discrete_attribute_limit:      Must be nonnegative integer OR "c" OR "d". Multipurpose param. If it is a nonnegative integer, discrete_attribute_limit determines the threshold that determines
+            :param discrete_attribute_limit:    Must be nonnegative integer OR "c" OR "d". Multipurpose param. If it is a nonnegative integer, discrete_attribute_limit determines the threshold that determines
                                                 if an attribute will be treated as a continuous or discrete attribute. For example, if discrete_attribute_limit == 10, if an attribute has more than 10 unique
                                                 values in the dataset, the attribute will be continuous. If the attribute has 10 or less unique values, it will be discrete. Alternatively,
                                                 discrete_attribute_limit can take the value of "c" or "d". See next param for this
-            :param specified_attributes:         Must be an ndarray type of nonnegative integer attributeIndices (zero indexed).
+            :param specified_attributes:        Must be an ndarray type of nonnegative integer attributeIndices (zero indexed).
                                                 If "c", attributes specified by index in this param will be continuous and the rest will be discrete. If "d", attributes specified by index in this
                                                 param will be discrete and the rest will be continuous.
-            :param random_state:                  Must be an integer or None. Set a constant random seed value to some integer (in order to obtain reproducible results). Put None if none (for pseudo-random algorithm runs)
-            :param prediction_error_reduction:    Must be float. The reduction of the prediction error when generating an offspring classifier
-            :param fitness_reduction:            Must be float. The reduction of the fitness when generating an offspring classifier
-            :param reboot_filename:    Must be String or None. Filename of model to be rebooted
+            :param random_state:                Must be an integer or None. Set a constant random seed value to some integer (in order to obtain reproducible results). Put None if none (for pseudo-random algorithm runs)
+            :param prediction_error_reduction:  Must be float. The reduction of the prediction error when generating an offspring classifier
+            :param fitness_reduction:           Must be float. The reduction of the fitness when generating an offspring classifier
+            :param reboot_filename:             Must be String or None. Filename of model to be rebooted
             '''
 
             #learning_iterations
@@ -261,7 +261,7 @@ class XCS(BaseEstimator,ClassifierMixin):
 
     def checkIsInt(self, num):
         try:
-            n = float(num)
+            float(num)   # this unnecessary float cast improves performance!
             if num - int(num) == 0:
                 return True
             else:
@@ -271,7 +271,7 @@ class XCS(BaseEstimator,ClassifierMixin):
 
     def checkIsFloat(self,num):
         try:
-            n = float(num)
+            float(num)
             return True
         except:
             return False
@@ -357,23 +357,19 @@ class XCS(BaseEstimator,ClassifierMixin):
     def runIteration(self,state):
         self.trackingObj.resetAll()
         shouldExplore = random.random() < self.p_explore
+        self.population.createMatchSet(state,self)
+        predictionArray = PredictionArray(self.population,self)         
         if shouldExplore:
-            self.population.createMatchSet(state,self)
-            predictionArray = PredictionArray(self.population,self)
             actionWinner = predictionArray.randomActionWinner()
             self.population.createActionSet(actionWinner)
             reward = self.env.executeAction(actionWinner)
             self.population.updateActionSet(reward,self)
             self.population.runGA(state,self)
-            self.population.deletion(self)
         else:
-            self.population.createMatchSet(state, self)
-            predictionArray = PredictionArray(self.population, self)
             actionWinner = predictionArray.bestActionWinner()
             self.population.createActionSet(actionWinner)
             reward = self.env.executeAction(actionWinner)
             self.population.updateActionSet(reward, self)
-            self.population.deletion(self)
 
             if reward == self.max_payoff:
                 if len(self.trackedAccuracy) == self.movingAvgCount:
@@ -383,7 +379,7 @@ class XCS(BaseEstimator,ClassifierMixin):
                 if len(self.trackedAccuracy) == self.movingAvgCount:
                     del self.trackedAccuracy[0]
                 self.trackedAccuracy.append(0)
-
+        self.population.deletion(self)
         self.trackingObj.avgIterAge = self.iterationCount - self.population.getInitStampAverage()
         self.trackingObj.macroPopSize = len(self.population.popSet)
         self.trackingObj.microPopSize = self.population.microPopSize
@@ -659,16 +655,7 @@ class XCS(BaseEstimator,ClassifierMixin):
 class TempTrackingObj():
     #Tracks stats of every iteration (except accuracy, avg generality, and times)
     def __init__(self):
-        self.macroPopSize = 0
-        self.microPopSize = 0
-        self.matchSetSize = 0
-        self.correctSetSize = 0
-        self.avgIterAge = 0
-        self.subsumptionCount = 0
-        self.crossOverCount = 0
-        self.mutationCount = 0
-        self.coveringCount = 0
-        self.deletionCount = 0
+        self.resetAll()
 
     def resetAll(self):
         self.macroPopSize = 0

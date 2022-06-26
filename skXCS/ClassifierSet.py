@@ -16,8 +16,7 @@ class ClassifierSet:
         actionsNotCovered = copy.deepcopy(xcs.env.formatData.phenotypeList)
         totalNumActions = len(xcs.env.formatData.phenotypeList)
 
-        for i in range(len(self.popSet)):
-            classifier = self.popSet[i]
+        for i, classifier in enumerate(self.popSet):
             if classifier.match(state,xcs):
                 self.matchSet.append(i)
                 if classifier.action in actionsNotCovered:
@@ -35,7 +34,7 @@ class ClassifierSet:
                 action = random.choice(copy.deepcopy(xcs.env.formatData.phenotypeList))
             coveredClassifier = Classifier(xcs)
             coveredClassifier.initializeWithMatchingStateAndGivenAction(1,state,action,xcs)
-            self.addClassifierToPopulation(xcs,coveredClassifier,True)
+            self.addClassifierToPopulation(coveredClassifier,True)
             self.matchSet.append(len(self.popSet)-1)
             if len(actionsNotCovered) != 0:
                 actionsNotCovered.remove(action)
@@ -47,16 +46,16 @@ class ClassifierSet:
             self.popSet[ref].matchCount += 1
         xcs.timer.stopTimeMatching()
 
-    def getIdenticalClassifier(self,xcs,newClassifier):
+    def getIdenticalClassifier(self,newClassifier):
         for classifier in self.popSet:
             if newClassifier.equals(classifier):
                 return classifier
         return None
 
-    def addClassifierToPopulation(self,xcs,classifier,isCovering):
+    def addClassifierToPopulation(self,classifier,isCovering):
         oldCl = None
         if not isCovering:
-            oldCl = self.getIdenticalClassifier(xcs,classifier)
+            oldCl = self.getIdenticalClassifier(classifier)
         if oldCl != None:
             oldCl.updateNumerosity(1)
             self.microPopSize += 1
@@ -96,18 +95,14 @@ class ClassifierSet:
         accuracySum = 0
         accuracies = []
 
-        i = 0
-        for clRef in self.actionSet:
+        for i, clRef in enumerate(self.actionSet):
             classifier = self.popSet[clRef]
             accuracies.append(classifier.getAccuracy(xcs))
             accuracySum = accuracySum + accuracies[i]*classifier.numerosity
-            i+=1
 
-        i = 0
-        for clRef in self.actionSet:
+        for i, clRef in enumerate(self.actionSet):
             classifier = self.popSet[clRef]
             classifier.updateFitness(accuracySum,accuracies[i],xcs)
-            i+=1
 
     ####Action Set Subsumption####
     def do_action_set_subsumption(self,xcs):
@@ -203,9 +198,9 @@ class ClassifierSet:
             xcs.timer.stopTimeSubsumption()
         else:
             if len(child1.specifiedAttList) > 0:
-                self.addClassifierToPopulation(xcs, child1, False)
+                self.addClassifierToPopulation(child1, False)
             if len(child2.specifiedAttList) > 0:
-                self.addClassifierToPopulation(xcs, child2, False)
+                self.addClassifierToPopulation(child2, False)
 
     def subsumeClassifier(self,child,parent1,parent2,xcs):
         if parent1.subsumes(child,xcs):
@@ -218,7 +213,7 @@ class ClassifierSet:
             xcs.trackingObj.subsumptionCount += 1
         else: #No additional [A] subsumption w/ offspring rules
             if len(child.specifiedAttList) > 0:
-                self.addClassifierToPopulation(xcs, child, False)
+                self.addClassifierToPopulation(child, False)
 
     def getIterStampAverage(self): #Average GA Timestamp
         sumCl = 0
@@ -278,17 +273,15 @@ class ClassifierSet:
             vote = classifier.getDelProp(meanFitness,xcs)
             deletionProbSum += vote
             voteList.append(vote)
-        i = 0
-        for classifier in self.popSet:
+        for i, classifier in enumerate(self.popSet):
             classifier.deletionProb = voteList[i]/deletionProbSum
-            i+=1
 
         choicePoint = deletionProbSum * random.random()
         newSum = 0
-        for i in range(len(voteList)):
-            classifier = self.popSet[i]
-            newSum = newSum + voteList[i]
+        for i, vote in enumerate(voteList):
+            newSum += vote
             if newSum > choicePoint:
+                classifier = self.popSet[i]
                 classifier.updateNumerosity(-1)
                 self.microPopSize -= 1
                 if classifier.numerosity < 1:
@@ -300,10 +293,7 @@ class ClassifierSet:
         return
 
     def getFitnessSum(self):
-        sum = 0
-        for classifier in self.popSet:
-            sum += classifier.fitness
-        return sum
+        return sum(classifier.fitness for classifier in self.popSet)
 
     ####Clear Sets####
     def clearSets(self):
@@ -326,22 +316,17 @@ class ClassifierSet:
             aveGenerality = 0
         else:
             aveGenerality = generalitySum/self.microPopSize
-
         return aveGenerality
 
     def getAttributeSpecificityList(self,xcs): #To be changed for XCS
-        attributeSpecList = []
-        for i in range(xcs.env.formatData.numAttributes):
-            attributeSpecList.append(0)
+        attributeSpecList = [0] * xcs.env.formatData.numAttributes
         for cl in self.popSet:
             for ref in cl.specifiedAttList:
                 attributeSpecList[ref] += cl.numerosity
         return attributeSpecList
 
     def getAttributeAccuracyList(self,xcs): #To be changed for XCS
-        attributeAccList = []
-        for i in range(xcs.env.formatData.numAttributes):
-            attributeAccList.append(0.0)
+        attributeAccList = [0.0] * xcs.env.formatData.numAttributes
         for cl in self.popSet:
             for ref in cl.specifiedAttList:
                 attributeAccList[ref] += cl.numerosity * cl.getAccuracy(xcs)
